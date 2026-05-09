@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Comagro Eventos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1f2f6b; --primary-hover: #2d4299; --primary-light: #eef1fb;
+      --border: #e2e7f4; --text-1: #1a1f36; --text-2: #6f7b87; --text-3: #9aa3b0;
+      --danger: #dc2626; --success: #16a34a;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(145deg, #f0f3ff 0%, #eef1fb 60%, #f7f8fc 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .login-wrapper { width: 100%; max-width: 980px; display: flex; align-items: center; gap: 64px; position: relative; z-index: 1; }
+    
+    .login-left { flex: 1; display: flex; flex-direction: column; gap: 28px; }
+    .login-brand { display: flex; align-items: center; gap: 14px; }
+    .login-brand img { height: 52px; width: auto; }
+    .login-brand-text { font-family: 'Montserrat', sans-serif; }
+    .brand-name { font-weight: 800; font-size: 1.1rem; color: var(--primary); letter-spacing: -.01em; }
+    .brand-sub { font-size: .75rem; color: var(--text-3); font-weight: 500; }
+    
+    .login-headline h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; color: var(--primary); line-height: 1.1; letter-spacing: -.02em; }
+    .login-headline p { font-size: .95rem; color: var(--text-2); margin-top: 12px; line-height: 1.6; max-width: 380px; }
+    
+    .login-features { display: flex; flex-direction: column; gap: 12px; }
+    .login-feature { display: flex; align-items: center; gap: 12px; font-size: .875rem; color: var(--text-2); }
+    .login-feature-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    
+    .login-card { width: 100%; max-width: 380px; background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(31,47,107,.14), 0 4px 16px rgba(31,47,107,.06); padding: 36px 32px; flex-shrink: 0; border: 1px solid var(--border); }
+    .login-card-header { margin-bottom: 24px; text-align: center; }
+    .card-icon { width: 52px; height: 52px; background: var(--primary); color: #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+    .login-card-header h2 { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text-1); }
+    .login-card-header p { font-size: .82rem; color: var(--text-2); margin-top: 5px; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-input { width: 100%; height: 44px; padding: 0 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: .9rem; color: var(--text-1); outline: none; transition: border-color .15s; }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31,47,107,.10); }
+    
+    .btn-login { width: 100%; height: 46px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-size: .95rem; font-weight: 700; cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-login:hover { background: var(--primary-hover); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+    
+    .status-msg { margin-top: 14px; padding: 12px; border-radius: 8px; font-size: .82rem; font-weight: 500; display: none; text-align: center; line-height: 1.4; }
+    .status-msg.show { display: block; }
+    .status-msg.error { background: #fef2f2; color: var(--danger); }
+    .status-msg.success { background: #f0fdf4; color: var(--success); }
+    
+    .login-footer-note { margin-top: 20px; text-align: center; font-size: .74rem; color: var(--text-3); line-height: 1.5; }
+    
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: .25; pointer-events: none; z-index: 0; }
+    .blob-1 { width: 400px; height: 400px; background: #c7d0f7; top: -100px; left: -100px; }
+    .blob-2 { width: 300px; height: 300px; background: #b6d8ff; bottom: -80px; right: -60px; }
+    
+    @media (max-width: 760px) {
+      .login-left { display: none; }
+      .login-wrapper { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="login-wrapper">
+    <div class="login-left">
+      <div class="login-brand">
+        <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+        <div class="login-brand-text">
+          <div class="brand-name">Comagro</div>
+          <div class="brand-sub">Sistema de Eventos</div>
+        </div>
+      </div>
+      <div class="login-headline">
+        <h1>Gestión de<br>Eventos 2026</h1>
+        <p>Plataforma centralizada para crear, gestionar y hacer seguimiento de todos tus eventos corporativos.</p>
+      </div>
+      <div class="login-features">
+        <div class="login-feature">
+          <div class="login-feature-icon"><i data-lucide="calendar-days" stroke-width="2.5" size="18"></i></div>
+          <span>Gestión completa de eventos y capacitaciones</span>
+        </div>
+        <div class="login-feature">
+          <div class="login-feature-icon"><i data-lucide="user-check" stroke-width="2.5" size="18"></i></div>
+          <span>Check-in y control de asistencia en tiempo real</span>
+        </div>
+        <div class="login-feature">
+          <div class="login-feature-icon"><i data-lucide="bar-chart-2" stroke-width="2.5" size="18"></i></div>
+          <span>Reportes exportables en Excel y PDF</span>
+        </div>
+        <div class="login-feature">
+          <div class="login-feature-icon"><i data-lucide="shield-check" stroke-width="2.5" size="18"></i></div>
+          <span>Acceso seguro mediante Magic Link (sin contraseñas)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-card-header">
+        <div class="card-icon"><i data-lucide="fingerprint" stroke-width="2" size="28"></i></div>
+        <h2>Acceso</h2>
+        <p>Escribí tu correo <strong>@comagro.com.py</strong> y te enviaremos un enlace para ingresar directo.</p>
+      </div>
+
+      <form id="form-login" novalidate>
+        <div class="form-group">
+          <input type="email" id="login-email" class="form-input" placeholder="correo@comagro.com.py" autocomplete="email" required>
+        </div>
+        <button type="submit" class="btn-login" id="btn-login">
+          <i data-lucide="mail" size="18"></i> <span id="btn-login-text">Enviar enlace de acceso</span>
+        </button>
+      </form>
+      
+      <div class="status-msg" id="login-status"></div>
+
+      <div class="login-footer-note">
+        En este dispositivo, una vez que ingreses, la sesión quedará guardada.<br>
+        <a href="mailto:soporte@comagro.com.py" style="color:var(--primary);font-weight:600;text-decoration:none;display:inline-block;margin-top:4px;">¿Necesitás ayuda?</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const SUPABASE_URL  = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
+    const SUPABASE_KEY  = 'sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { autoRefreshToken: true, persistSession: true }
+    });
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('login-status');
+      el.className = 'status-msg show ' + type;
+      el.textContent = msg;
+    }
+
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) { window.location.replace('./dashboard.html'); }
+    })();
+
+    document.getElementById('form-login').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      document.getElementById('login-status').className = 'status-msg';
+
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+
+      if (!email) {
+        showStatus('Ingresá tu correo corporativo.', 'error');
+        return;
+      }
+      if (!/^[a-zA-Z0-9._%+-]+@comagro\.com\.py$/i.test(email)) {
+        showStatus('Solo se permiten correos @comagro.com.py', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true;
+      document.getElementById('btn-login-text').textContent = 'Enviando enlace...';
+
+      const { error } = await sb.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: window.location.origin + "/dashboard.html"
+        }
+      });
+
+      if (error) {
+        btn.disabled = false;
+        document.getElementById('btn-login-text').textContent = 'Enviar enlace de acceso';
+        showStatus('No fue posible enviar el enlace.', 'error');
+        return;
+      }
+
+      btn.disabled = false;
+      document.getElementById('btn-login-text').textContent = 'Enviar enlace de acceso';
+      showStatus('¡Listo! Revisá tu correo corporativo y abrí el enlace para entrar.', 'success');
+      document.getElementById('login-email').value = '';
+    });
+  </script>
+</body>
+</html>

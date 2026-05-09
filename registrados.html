@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrados — Comagro Eventos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+      <div class="sidebar-logo-text">Comagro<br>Eventos</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">General</div>
+      <ul class="sidebar-nav">
+        <li><a href="./dashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i></span> Dashboard</a></li>
+        <li><a href="./eventos/index.html"><span class="nav-icon"><i data-lucide="calendar" size="18" stroke-width="2.5"></i></span> Eventos</a></li>
+        <li><a href="./eventos/crear.html"><span class="nav-icon"><i data-lucide="plus" size="18" stroke-width="2.5"></i></span> Crear Evento</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gestión</div>
+      <ul class="sidebar-nav">
+        <li><a href="./registrados.html" class="active"><span class="nav-icon"><i data-lucide="users" size="18" stroke-width="2.5"></i></span> Registrados</a></li>
+        <li><a href="./checkin.html"><span class="nav-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></span> Check-in</a></li>
+        <li><a href="./reportes.html"><span class="nav-icon"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></span> Reportes</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Cargando...</div>
+          <div class="sidebar-user-role" id="user-role">—</div>
+        </div>
+      </div>
+      <button id="btn-logout" class="btn btn-ghost btn-full" style="margin-top:12px;color:rgba(255,255,255,.5);justify-content:flex-start;gap:8px;font-size:.8rem;"><i data-lucide="log-out" size="16" stroke-width="2.5"></i> Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-title" id="topbar-title">Registrados</div>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm" id="btn-export-excel"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i> Excel</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- Event selector -->
+      <div class="card" style="margin-bottom:20px;" id="event-selector">
+        <h3 style="margin-bottom:12px;">Seleccionar evento</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <select id="event-select" class="form-control" style="flex:1;min-width:200px;">
+            <option value="">— Elegir evento —</option>
+          </select>
+          <button class="btn btn-primary" id="btn-load">Cargar registrados</button>
+        </div>
+      </div>
+
+      <!-- Registrados panel -->
+      <div id="reg-panel" style="display:none;">
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;" id="reg-stats">
+          <div class="stat-card"><div class="stat-icon blue"><i data-lucide="users" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-total">0</div><div class="stat-label">Registrados</div></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-present">0</div><div class="stat-label">Presentes</div></div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i data-lucide="hourglass" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-pending">0</div><div class="stat-label">Pendientes</div></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-pct">0%</div><div class="stat-label">Asistencia</div></div></div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar" style="margin-bottom:16px;">
+          <div class="search-input-wrap" style="flex:1;">
+            <span class="search-icon"><i data-lucide="search" size="18" stroke-width="2.5"></i></span>
+            <input type="text" id="reg-search" class="search-input" placeholder="Nombre, correo, empresa, ID...">
+          </div>
+          <select id="reg-filter-status" class="form-control" style="width:auto;height:38px;">
+            <option value="">Todos los estados</option>
+            <option value="preregistro">Preregistro</option>
+            <option value="confirmado">Confirmado</option>
+            <option value="presente">Presente</option>
+            <option value="ausente">Ausente</option>
+          </select>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Empresa</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Registrado</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="reg-tbody">
+              <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-3);">Seleccioná un evento para ver los registrados.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:.78rem;color:var(--text-3);" id="reg-count-label"></div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<!-- Edit modal -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar Registro</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" id="edit-firstname" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellido</label>
+          <input type="text" id="edit-lastname" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Empresa</label>
+        <input type="text" id="edit-company" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input type="text" id="edit-phone" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="edit-status" class="form-control">
+          <option value="preregistro">Preregistro</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="presente">Presente</option>
+          <option value="ausente">Ausente</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-edit">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY='sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true}});
+
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function formatDateTime(iso){if(!iso)return '—';const d=new Date(iso);return d.toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function statusLabel(s){return {'preregistro':'Preregistro','confirmado':'Confirmado','presente':'Presente','ausente':'Ausente'}[s]||s;}
+function statusBadge(s){return {'preregistro':'badge-yellow','confirmado':'badge-blue','presente':'badge-green','ausente':'badge-red'}[s]||'badge-gray';}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span class="toast-icon">${type==='success'?'✓':'✕'}</span><span>${sanitize(msg)}</span>`;c.appendChild(t);setTimeout(()=>t.classList.add('toast-show'),10);setTimeout(()=>{t.classList.remove('toast-show');setTimeout(()=>t.remove(),400);},3000);}
+
+let allRegs=[], currentEventName='';
+
+async function authGuard(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.replace('./login.html');return null;}
+  const {data:p}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  return {session,profile:p};
+}
+function renderUser(p){if(!p)return;const name=p.full_name||p.email||'U';document.getElementById('user-name').textContent=name;document.getElementById('user-role').textContent=p.role||'staff';document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+
+function applyFilters(){
+  const q=document.getElementById('reg-search').value.toLowerCase();
+  const st=document.getElementById('reg-filter-status').value;
+  const f=allRegs.filter(r=>{
+    const mq=!q||(r.first_name+' '+r.last_name).toLowerCase().includes(q)||(r.email||'').toLowerCase().includes(q)||(r.company||'').toLowerCase().includes(q)||(r.short_id||'').toLowerCase().includes(q);
+    const ms=!st||r.status===st;
+    return mq&&ms;
+  });
+  const total=allRegs.length, present=allRegs.filter(r=>r.status==='presente').length, pending=total-present;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-present').textContent=present;
+  document.getElementById('s-pending').textContent=pending;
+  document.getElementById('s-pct').textContent=(total>0?Math.round(present/total*100):0)+'%';
+  document.getElementById('reg-count-label').textContent=`Mostrando ${f.length} de ${total} registros`;
+
+  const tbody=document.getElementById('reg-tbody');
+  if(f.length===0){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state" style="padding:32px;"><div class="empty-state-icon"><i data-lucide="user" size="48" stroke-width="1.5"></i></div><h3>Sin resultados</h3></div></td></tr>`;return;}
+  tbody.innerHTML=f.map(r=>`
+    <tr>
+      <td><code style="font-size:.75rem;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;">#${sanitize(r.short_id)}</code></td>
+      <td><strong>${sanitize(r.first_name+' '+r.last_name)}</strong></td>
+      <td>${sanitize(r.company||'—')}</td>
+      <td style="font-size:.82rem;">${sanitize(r.email)}</td>
+      <td style="font-size:.82rem;">${sanitize(r.phone||'—')}</td>
+      <td style="font-size:.78rem;color:var(--text-3);">${formatDateTime(r.registered_at)}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${sanitize(statusLabel(r.status))}</span></td>
+      <td><button class="btn btn-secondary btn-sm" onclick="openEdit('${r.id}')">Editar</button></td>
+    </tr>
+  `).join('');
+}
+
+async function loadRegs(eventId, eventName){
+  currentEventName=eventName;
+  document.getElementById('topbar-title').textContent='Registrados — '+eventName;
+  const {data:regs}=await sb.from('registrations').select('*').eq('event_id',eventId).order('registered_at',{ascending:false});
+  allRegs=regs||[];
+  document.getElementById('reg-panel').style.display='block';
+  applyFilters();
+}
+
+function openEdit(id){
+  const r=allRegs.find(x=>x.id===id);
+  if(!r)return;
+  document.getElementById('edit-id').value=id;
+  document.getElementById('edit-firstname').value=r.first_name||'';
+  document.getElementById('edit-lastname').value=r.last_name||'';
+  document.getElementById('edit-company').value=r.company||'';
+  document.getElementById('edit-phone').value=r.phone||'';
+  document.getElementById('edit-status').value=r.status||'preregistro';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
+
+document.getElementById('btn-save-edit').addEventListener('click', async()=>{
+  const id=document.getElementById('edit-id').value;
+  const updates={
+    first_name:document.getElementById('edit-firstname').value.trim(),
+    last_name:document.getElementById('edit-lastname').value.trim(),
+    company:document.getElementById('edit-company').value.trim()||null,
+    phone:document.getElementById('edit-phone').value.trim()||null,
+    status:document.getElementById('edit-status').value,
+  };
+  if(updates.status==='presente'&&!allRegs.find(r=>r.id===id)?.attended_at){
+    updates.attended_at=new Date().toISOString();
+  }
+  const {error}=await sb.from('registrations').update(updates).eq('id',id);
+  if(error){showToast('Error al guardar.','error');return;}
+  const idx=allRegs.findIndex(r=>r.id===id);
+  if(idx>-1)allRegs[idx]={...allRegs[idx],...updates};
+  closeModal();
+  applyFilters();
+  showToast('Registro actualizado.');
+});
+
+// Excel export
+document.getElementById('btn-export-excel').addEventListener('click',()=>{
+  if(!allRegs.length){showToast('No hay datos para exportar.','error');return;}
+  const rows=allRegs.map(r=>({
+    'ID':r.short_id,'Nombre':r.first_name,'Apellido':r.last_name,
+    'Empresa':r.company||'','Correo':r.email,'Teléfono':r.phone||'',
+    'Estado':statusLabel(r.status),'Registrado':r.registered_at?new Date(r.registered_at).toLocaleString('es-PY'):'',
+    'Asistencia':r.attended_at?new Date(r.attended_at).toLocaleString('es-PY'):''
+  }));
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb,ws,'Registrados');
+  XLSX.writeFile(wb,`registrados-${currentEventName.replace(/\s/g,'-')}.xlsx`);
+  showToast('Excel exportado.');
+});
+
+document.getElementById('reg-search').addEventListener('input',applyFilters);
+document.getElementById('reg-filter-status').addEventListener('change',applyFilters);
+document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('./login.html');});
+
+document.getElementById('btn-load').addEventListener('click',async()=>{
+  const sel=document.getElementById('event-select');
+  const id=sel.value, name=sel.options[sel.selectedIndex]?.text||'Evento';
+  if(!id)return;
+  await loadRegs(id,name);
+});
+
+(async()=>{
+  const auth=await authGuard();
+  if(!auth)return;
+  renderUser(auth.profile);
+  const {data:events}=await sb.from('events').select('id,name,date').order('date',{ascending:false});
+  const sel=document.getElementById('event-select');
+  (events||[]).forEach(e=>{
+    const o=document.createElement('option');
+    o.value=e.id;
+    o.textContent=e.name+' ('+new Date(e.date+'T00:00:00').toLocaleDateString('es-PY')+')';
+    sel.appendChild(o);
+  });
+  const paramEvent=new URLSearchParams(window.location.search).get('event');
+  if(paramEvent){sel.value=paramEvent;const n=sel.options[sel.selectedIndex]?.text||'Evento';await loadRegs(paramEvent,n);}
+})();
+</script>
+
+<script>if(window.lucide) { lucide.createIcons(); }</script>
+</body>
+</html>

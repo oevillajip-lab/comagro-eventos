@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos — Comagro</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+      <div class="sidebar-logo-text">Comagro<br>Eventos</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">General</div>
+      <ul class="sidebar-nav">
+        <li><a href="../dashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i></span> Dashboard</a></li>
+        <li><a href="./index.html" class="active"><span class="nav-icon"><i data-lucide="calendar" size="18" stroke-width="2.5"></i></span> Eventos</a></li>
+        <li><a href="./crear.html"><span class="nav-icon"><i data-lucide="plus" size="18" stroke-width="2.5"></i></span> Crear Evento</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gestión</div>
+      <ul class="sidebar-nav">
+        <li><a href="../registrados.html"><span class="nav-icon"><i data-lucide="users" size="18" stroke-width="2.5"></i></span> Registrados</a></li>
+        <li><a href="../checkin.html"><span class="nav-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></span> Check-in</a></li>
+        <li><a href="../reportes.html"><span class="nav-icon"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></span> Reportes</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Cargando...</div>
+          <div class="sidebar-user-role" id="user-role">—</div>
+        </div>
+      </div>
+      <button id="btn-logout" class="btn btn-ghost btn-full" style="margin-top:12px;color:rgba(255,255,255,.5);justify-content:flex-start;gap:8px;font-size:.8rem;">
+        <i data-lucide="log-out" size="16" stroke-width="2.5"></i> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-title">Eventos</div>
+      <div class="topbar-actions">
+        <a href="./crear.html" class="btn btn-primary btn-sm">+ Nuevo Evento</a>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- Filter bar -->
+      <div style="margin-bottom:22px;">
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <span class="search-icon"><i data-lucide="search" size="18" stroke-width="2.5"></i></span>
+            <input type="text" id="search-input" class="search-input" placeholder="Buscar evento...">
+          </div>
+          <select id="filter-status" class="form-control" style="width:auto;height:38px;">
+            <option value="">Todos los estados</option>
+            <option value="borrador">Borrador</option>
+            <option value="activo">Activo</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
+          <select id="filter-type" class="form-control" style="width:auto;height:38px;">
+            <option value="">Todos los tipos</option>
+            <option value="capacitacion">Capacitación</option>
+            <option value="evento">Evento</option>
+            <option value="lanzamiento">Lanzamiento</option>
+            <option value="feria">Feria</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Events grid -->
+      <div id="events-loader" class="loader-page"><div class="loader" style="border-top-color:var(--primary);border-color:var(--border);"></div></div>
+      <div class="grid-events" id="events-grid" style="display:none;"></div>
+      <div id="empty-state-events" style="display:none;">
+        <div class="empty-state" style="padding:64px 24px;">
+          <div class="empty-state-icon"><i data-lucide="inbox" size="48" stroke-width="1.5"></i></div>
+          <h3>Sin eventos</h3>
+          <p>No hay eventos que coincidan con los filtros.</p>
+          <a href="./crear.html" class="btn btn-primary" style="margin-top:18px;">Crear primer evento</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script>
+const SUPABASE_URL = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { autoRefreshToken:true, persistSession:true } });
+
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function formatDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'short',year:'numeric'});}
+function statusLabel(s){return {'borrador':'Borrador','activo':'Activo','finalizado':'Finalizado','capacitacion':'Capacitación','evento':'Evento','lanzamiento':'Lanzamiento','feria':'Feria','otro':'Otro'}[s]||s;}
+function statusBadge(s){return {'borrador':'badge-gray','activo':'badge-blue','finalizado':'badge-green'}[s]||'badge-gray';}
+
+let allEvents=[], regCounts={};
+
+async function authGuard(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.replace('../login.html');return null;}
+  const {data:profile}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  return {session,profile};
+}
+function renderUser(p){
+  if(!p)return;
+  const name=p.full_name||p.email||'Usuario';
+  document.getElementById('user-name').textContent=name;
+  document.getElementById('user-role').textContent=p.role||'staff';
+  document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+}
+
+function buildEventCard(e){
+  const count=regCounts[e.id]||0;
+  const pct=e.max_capacity>0?Math.round(count/e.max_capacity*100):0;
+  const bannerStyle=e.banner_url?`background:url(${sanitize(e.banner_url)}) center/cover`:'background:linear-gradient(135deg,#1f2f6b 0%,#2d4299 100%)';
+  return `
+    <div class="event-card" onclick="location.href='./admin.html?slug=${encodeURIComponent(e.slug)}'">
+      <div class="event-card-banner" style="${bannerStyle};">
+        <div class="event-card-type"><span class="badge badge-blue">${sanitize(statusLabel(e.type))}</span></div>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-date"><i data-lucide="calendar" size="18" stroke-width="2.5"></i> ${formatDate(e.date)}</div>
+        <div class="event-card-name">${sanitize(e.name)}</div>
+        <div class="event-card-location"><i data-lucide="map-pin" size="16" stroke-width="2"></i> ${sanitize(e.location||'Sin ubicación definida')}</div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-2);margin-bottom:5px;">
+            <span>${count} registrados</span><span>${pct}% cupo</span>
+          </div>
+          <div class="progress"><div class="progress-bar ${pct>80?'red':pct>50?'yellow':''}" style="width:${Math.min(pct,100)}%;"></div></div>
+        </div>
+        <div class="event-card-footer">
+          <span class="badge ${statusBadge(e.status)}">${sanitize(statusLabel(e.status))}</span>
+          <span class="btn btn-secondary btn-sm">Gestionar →</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function applyFilters(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const st=document.getElementById('filter-status').value;
+  const ty=document.getElementById('filter-type').value;
+  const filtered=allEvents.filter(e=>{
+    const matchQ=!q||e.name.toLowerCase().includes(q)||(e.location||'').toLowerCase().includes(q);
+    const matchSt=!st||e.status===st;
+    const matchTy=!ty||e.type===ty;
+    return matchQ&&matchSt&&matchTy;
+  });
+  const grid=document.getElementById('events-grid');
+  const empty=document.getElementById('empty-state-events');
+  if(filtered.length===0){grid.style.display='none';empty.style.display='block';}
+  else{grid.style.display='grid';empty.style.display='none';grid.innerHTML=filtered.map(buildEventCard).join('');}
+}
+
+async function loadEvents(){
+  const [evRes,regRes]=await Promise.all([
+    sb.from('events').select('*').order('date',{ascending:false}),
+    sb.from('registrations').select('id,event_id')
+  ]);
+  allEvents=evRes.data||[];
+  (regRes.data||[]).forEach(r=>{regCounts[r.event_id]=(regCounts[r.event_id]||0)+1;});
+  document.getElementById('events-loader').style.display='none';
+  applyFilters();
+}
+
+document.getElementById('search-input').addEventListener('input',applyFilters);
+document.getElementById('filter-status').addEventListener('change',applyFilters);
+document.getElementById('filter-type').addEventListener('change',applyFilters);
+document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('../login.html');});
+
+(async()=>{
+  const auth=await authGuard();
+  if(!auth)return;
+  renderUser(auth.profile);
+  await loadEvents();
+})();
+</script>
+
+<script>if(window.lucide) { lucide.createIcons(); }</script>
+</body>
+</html>

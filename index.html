@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirigiendo... — Comagro Eventos</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f7f8fc;
+      font-family: system-ui, sans-serif;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e2e7f4;
+      border-top-color: #1f2f6b;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="spinner"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { autoRefreshToken: true, persistSession: true }
+    });
+
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        window.location.replace('./dashboard.html');
+      } else {
+        window.location.replace('./login.html');
+      }
+    })();
+  </script>
+
+<script>if(window.lucide) { lucide.createIcons(); }</script>
+</body>
+</html>

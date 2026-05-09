@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registración — Comagro Eventos</title>
+  <meta name="description" content="Formulario de inscripción al evento.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --primary:#1f2f6b;--primary-hover:#2d4299;--primary-light:#eef1fb;
+      --border:#e2e7f4;--text-1:#1a1f36;--text-2:#6f7b87;--text-3:#9aa3b0;
+      --danger:#dc2626;--success:#16a34a;--warning:#d97706;
+    }
+    body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,#eef1fb 0%,#f7f8fc 100%);min-height:100vh;padding:32px 16px;}
+    .container{max-width:600px;margin:0 auto;}
+
+    /* Event Info Card */
+    .event-info{background:#fff;border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:24px;box-shadow:0 4px 24px rgba(31,47,107,.08);}
+    .event-banner{height:160px;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-hover) 100%);position:relative;display:flex;align-items:flex-end;padding:20px;}
+    .event-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .event-banner-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(31,47,107,.65) 0%,transparent 60%);}
+    .event-banner-content{position:relative;z-index:1;}
+    .event-type-badge{display:inline-block;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.2);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;backdrop-filter:blur(6px);margin-bottom:6px;}
+    .event-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.35rem;color:#fff;line-height:1.2;}
+    .event-meta{padding:18px 22px;display:flex;flex-wrap:wrap;gap:16px;}
+    .event-meta-item{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text-2);}
+    .event-meta-item strong{color:var(--text-1);}
+
+    /* Form Card */
+    .form-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px 28px 32px;box-shadow:0 4px 24px rgba(31,47,107,.08);}
+    .form-card h2{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.2rem;color:var(--primary);margin-bottom:6px;}
+    .form-card .subtitle{font-size:.85rem;color:var(--text-2);margin-bottom:24px;line-height:1.5;}
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--text-1);margin-bottom:6px;}
+    .req{color:var(--danger);margin-left:2px;}
+    .form-input{width:100%;height:44px;padding:0 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.9rem;color:var(--text-1);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;}
+    .form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,47,107,.10);}
+    .form-input::placeholder{color:var(--text-3);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .btn-submit{width:100%;height:50px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;margin-top:6px;transition:background .15s,box-shadow .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-submit:hover{background:var(--primary-hover);box-shadow:0 6px 20px rgba(31,47,107,.28);}
+    .btn-submit:active{transform:scale(.98);}
+    .btn-submit:disabled{opacity:.55;cursor:not-allowed;pointer-events:none;}
+    .form-note{margin-top:14px;font-size:.75rem;color:var(--text-3);text-align:center;line-height:1.5;}
+    .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Error / Status */
+    .status-msg{padding:12px 16px;border-radius:10px;font-size:.85rem;font-weight:500;margin-bottom:16px;display:none;align-items:center;gap:10px;}
+    .status-msg.show{display:flex;}
+    .status-msg.error{background:#fef2f2;color:var(--danger);}
+    .status-msg.info{background:var(--primary-light);color:var(--primary);}
+
+    /* ---- SUCCESS SCREEN ---- */
+    .success-screen{display:none;text-align:center;}
+    .success-icon{width:80px;height:80px;background:linear-gradient(135deg,#dcfce7,#bbf7d0);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 20px;}
+    .success-screen h2{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.5rem;color:var(--text-1);margin-bottom:8px;}
+    .success-screen p{color:var(--text-2);font-size:.9rem;line-height:1.6;max-width:380px;margin:0 auto 20px;}
+    .success-info{background:var(--primary-light);border-radius:12px;padding:14px 18px;margin-bottom:22px;text-align:left;}
+    .success-info-row{display:flex;justify-content:space-between;font-size:.82rem;padding:4px 0;}
+    .success-info-row .label{color:var(--text-2);}
+    .success-info-row .val{font-weight:600;color:var(--text-1);}
+    .btn-calendar{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .15s;}
+    .btn-calendar:hover{background:var(--primary-hover);}
+
+    /* Closed / Full states */
+    .closed-screen{display:none;text-align:center;padding:40px 20px;}
+    .closed-icon{font-size:3rem;margin-bottom:14px;}
+    .closed-screen h2{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--text-1);margin-bottom:8px;}
+    .closed-screen p{color:var(--text-2);font-size:.9rem;}
+
+    /* Logo footer */
+    .footer-logo{text-align:center;margin-top:28px;opacity:.5;}
+    .footer-logo img{height:28px;margin:0 auto;}
+
+    @media(max-width:500px){
+      .form-row{grid-template-columns:1fr;}
+      .form-card{padding:22px 18px 26px;}
+    }
+  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="container">
+
+  <!-- State: loading -->
+  <div id="state-loading" style="text-align:center;padding:80px 20px;">
+    <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;"></div>
+    <p style="color:var(--text-2);font-size:.9rem;">Cargando información del evento...</p>
+  </div>
+
+  <!-- State: not found -->
+  <div id="state-notfound" style="display:none;">
+    <div class="closed-screen" style="display:block;">
+      <div class="closed-icon"><i data-lucide="search" size="18" stroke-width="2.5"></i></div>
+      <h2>Evento no encontrado</h2>
+      <p>El enlace de inscripción no es válido o el evento ya no está disponible.</p>
+    </div>
+  </div>
+
+  <!-- State: closed (inactive) -->
+  <div id="state-closed" style="display:none;">
+    <div class="closed-screen" style="display:block;">
+      <div class="closed-icon"><i data-lucide="lock" size="48" stroke-width="1.5"></i></div>
+      <h2>Inscripciones cerradas</h2>
+      <p id="state-closed-msg">Este evento no está aceptando inscripciones en este momento.</p>
+    </div>
+  </div>
+
+  <!-- State: full -->
+  <div id="state-full" style="display:none;">
+    <div class="closed-screen" style="display:block;">
+      <div class="closed-icon"><i data-lucide="target" size="48" stroke-width="1.5"></i></div>
+      <h2>¡Cupo completo!</h2>
+      <p>Este evento alcanzó su capacidad máxima de inscriptos.</p>
+    </div>
+  </div>
+
+  <!-- State: main form -->
+  <div id="state-form" style="display:none;">
+    <!-- Event info -->
+    <div class="event-info">
+      <div class="event-banner" id="ev-banner-el">
+        <img id="ev-banner-img" src="" alt="" style="display:none;">
+        <div class="event-banner-overlay"></div>
+        <div class="event-banner-content">
+          <div class="event-type-badge" id="ev-type-badge">Evento</div>
+          <div class="event-title" id="ev-title">Cargando...</div>
+        </div>
+      </div>
+      <div class="event-meta">
+        <div class="event-meta-item"><i data-lucide="calendar" size="18" stroke-width="2.5"></i> <strong id="ev-date">—</strong></div>
+        <div class="event-meta-item"><i data-lucide="clock" size="18" stroke-width="2.5"></i> <strong id="ev-time">—</strong></div>
+        <div class="event-meta-item"><i data-lucide="map-pin" size="16" stroke-width="2"></i> <strong id="ev-location">—</strong></div>
+        <div class="event-meta-item"><i data-lucide="users" size="18" stroke-width="2.5"></i> <strong id="ev-spots">—</strong> lugares disponibles</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+      <h2>Completá tu registro</h2>
+      <p class="subtitle">Ingresá tus datos para inscribirte. Todos los campos marcados con <span style="color:var(--danger);">*</span> son obligatorios.</p>
+
+      <!-- Form messages -->
+      <div class="status-msg" id="form-status"></div>
+
+      <!-- Form -->
+      <form id="reg-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="r-firstname">Nombre <span class="req">*</span></label>
+            <input type="text" id="r-firstname" class="form-input" placeholder="Ej: Carlos" maxlength="100" required autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-lastname">Apellido <span class="req">*</span></label>
+            <input type="text" id="r-lastname" class="form-input" placeholder="Ej: Pérez" maxlength="100" required autocomplete="family-name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="r-email">Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="r-email" class="form-input" placeholder="correo@empresa.com" maxlength="200" required autocomplete="email">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="r-phone">Teléfono</label>
+            <input type="tel" id="r-phone" class="form-input" placeholder="+595 981 000000" maxlength="30" autocomplete="tel">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-company">Empresa</label>
+            <input type="text" id="r-company" class="form-input" placeholder="Nombre de tu empresa" maxlength="150" autocomplete="organization">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-reg">
+          <span id="btn-reg-text">Confirmar inscripción</span>
+        </button>
+        <div class="form-note">Al inscribirte aceptás que tus datos sean utilizados para la organización del evento. No recibirás correos no solicitados.</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- State: success -->
+  <div id="state-success" style="display:none;">
+    <div class="form-card">
+      <div class="success-screen" style="display:block;">
+        <div class="success-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></div>
+        <h2>¡Inscripción confirmada!</h2>
+        <p>Tu registro fue exitoso. Te esperamos en el evento.</p>
+        <div class="success-info" id="success-info"></div>
+        <button class="btn-calendar" id="btn-ics"><i data-lucide="calendar" size="18" stroke-width="2.5"></i> Agregar al calendario</button>
+        <div style="margin-top:14px;font-size:.75rem;color:var(--text-3);">Se descargará un archivo .ics compatible con Google Calendar, Outlook y Apple Calendar.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-logo">
+    <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ---- Utils ---- */
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function formatDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function formatTime(t){if(!t)return '—';const[h,m]=t.split(':');const hh=parseInt(h);const ampm=hh>=12?'PM':'AM';return `${hh>12?hh-12:hh||12}:${m} ${ampm}`;}
+function generateShortId(n=6){const c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';const a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a,b=>c[b%c.length]).join('');}
+function slugify(t){return t.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');}
+
+function showState(id){
+  ['state-loading','state-notfound','state-closed','state-full','state-form','state-success'].forEach(s=>{
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
+  });
+}
+function showFormStatus(msg,type){
+  const el=document.getElementById('form-status');
+  el.className='status-msg show '+type;
+  el.textContent=msg;
+}
+
+/* ---- Rate limit: 1 req / 45s por slug ---- */
+function checkRateLimit(slug){
+  const key='rl_reg_'+slug;
+  const now=Date.now();
+  const last=parseInt(localStorage.getItem(key)||'0',10);
+  if(now-last<45000)return false;
+  localStorage.setItem(key,now);
+  return true;
+}
+
+/* ---- Generate ICS ---- */
+function downloadICS(ev){
+  const dt=(ev.date||'').replace(/-/g,'');
+  const tm=ev.time?(ev.time.replace(':','')+'00'):'';
+  const dtstart=dt+(tm?'T'+tm:'');
+  const ics=[
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Comagro//ES',
+    'BEGIN:VEVENT',
+    'UID:'+generateShortId(12)+'@comagro.com.py',
+    'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z',
+    'DTSTART'+(tm?':':';VALUE=DATE:')+dtstart,
+    'SUMMARY:'+ev.name,
+    'LOCATION:'+(ev.location||''),
+    'DESCRIPTION:'+(ev.description||''),
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=slugify(ev.name)+'.ics';a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---- Main ---- */
+let currentEvent=null;
+
+(async()=>{
+  const slug=new URLSearchParams(window.location.search).get('slug');
+  if(!slug){showState('state-notfound');return;}
+
+  // Load event
+  const {data:ev,error}=await sb.from('events')
+    .select('id,name,slug,type,description,date,time,location,banner_url,max_capacity,registration_deadline,status')
+    .eq('slug',slug).single();
+
+  if(error||!ev){showState('state-notfound');return;}
+  currentEvent=ev;
+
+  // Check status
+  if(ev.status!=='activo'){
+    document.getElementById('state-closed-msg').textContent=
+      ev.status==='borrador'?'Este evento aún no está publicado.':'Las inscripciones para este evento han cerrado.';
+    showState('state-closed');return;
+  }
+
+  // Check deadline
+  if(ev.registration_deadline){
+    const today=new Date().toISOString().split('T')[0];
+    if(today>ev.registration_deadline){
+      document.getElementById('state-closed-msg').textContent='El período de inscripción ha finalizado.';
+      showState('state-closed');return;
+    }
+  }
+
+  // Check capacity
+  const {count}=await sb.from('registrations').select('id',{count:'exact',head:true}).eq('event_id',ev.id);
+  const spotsLeft=ev.max_capacity-count;
+  if(spotsLeft<=0){showState('state-full');return;}
+
+  // Populate UI
+  document.title=sanitize(ev.name)+' — Comagro Eventos';
+  document.getElementById('ev-title').textContent=ev.name;
+  document.getElementById('ev-type-badge').textContent=
+    {'capacitacion':'Capacitación','evento':'Evento','lanzamiento':'Lanzamiento','feria':'Feria','otro':'Otro'}[ev.type]||ev.type;
+  document.getElementById('ev-date').textContent=formatDate(ev.date);
+  document.getElementById('ev-time').textContent=formatTime(ev.time);
+  document.getElementById('ev-location').textContent=ev.location||'A confirmar';
+  document.getElementById('ev-spots').textContent=spotsLeft.toLocaleString('es-PY');
+
+  if(ev.banner_url){
+    const img=document.getElementById('ev-banner-img');
+    img.src=ev.banner_url;img.style.display='block';
+  }
+  showState('state-form');
+})();
+
+/* ---- Submit ---- */
+document.getElementById('reg-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  document.getElementById('form-status').className='status-msg';
+
+  const firstName=document.getElementById('r-firstname').value.trim();
+  const lastName=document.getElementById('r-lastname').value.trim();
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const phone=document.getElementById('r-phone').value.trim()||null;
+  const company=document.getElementById('r-company').value.trim()||null;
+
+  if(!firstName||!lastName){showFormStatus('Ingresá tu nombre y apellido.','error');return;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showFormStatus('Ingresá un correo electrónico válido.','error');return;}
+
+  // Rate limit
+  if(!checkRateLimit(currentEvent.slug)){
+    showFormStatus('Esperá unos segundos antes de intentar de nuevo.','error');return;
+  }
+
+  const btn=document.getElementById('btn-reg');
+  const txt=document.getElementById('btn-reg-text');
+  btn.disabled=true;
+  txt.innerHTML='<span class="spinner"></span>';
+
+  try {
+    // Check capacity again
+    const {count}=await sb.from('registrations').select('id',{count:'exact',head:true}).eq('event_id',currentEvent.id);
+    if(count>=currentEvent.max_capacity){showState('state-full');return;}
+
+    // Check duplicate email for this event
+    const {data:dup}=await sb.from('registrations').select('id').eq('event_id',currentEvent.id).eq('email',email).maybeSingle();
+    if(dup){showFormStatus('Ya existe una inscripción con este correo para este evento.','error');btn.disabled=false;txt.textContent='Confirmar inscripción';return;}
+
+    let shortId;
+    // Generate unique short_id
+    for(let i=0;i<5;i++){
+      shortId=generateShortId(6);
+      const {data:ex}=await sb.from('registrations').select('id').eq('short_id',shortId).maybeSingle();
+      if(!ex)break;
+    }
+
+    const {data:reg,error}=await sb.from('registrations').insert({
+      event_id:currentEvent.id,short_id:shortId,
+      first_name:firstName,last_name:lastName,
+      email,phone,company,status:'preregistro'
+    }).select().single();
+
+    if(error)throw error;
+
+    // Show success
+    document.getElementById('success-info').innerHTML=`
+      <div class="success-info-row"><span class="label">Nombre</span><span class="val">${sanitize(firstName+' '+lastName)}</span></div>
+      <div class="success-info-row"><span class="label">Correo</span><span class="val">${sanitize(email)}</span></div>
+      <div class="success-info-row"><span class="label">Evento</span><span class="val">${sanitize(currentEvent.name)}</span></div>
+      <div class="success-info-row"><span class="label">Fecha</span><span class="val">${formatDate(currentEvent.date)}</span></div>
+      <div class="success-info-row"><span class="label">Lugar</span><span class="val">${sanitize(currentEvent.location||'A confirmar')}</span></div>
+      <div class="success-info-row"><span class="label">ID Registro</span><span class="val" style="color:var(--primary);font-weight:800;">#${sanitize(shortId)}</span></div>
+    `;
+    document.getElementById('btn-ics').onclick=()=>downloadICS(currentEvent);
+    showState('state-success');
+  } catch(err){
+    btn.disabled=false;
+    txt.textContent='Confirmar inscripción';
+    if(err.code==='23505'){
+      showFormStatus('Ya existe una inscripción con este correo para este evento.','error');
+    } else {
+      showFormStatus('Error al procesar la inscripción. Intentá de nuevo.','error');
+    }
+  }
+});
+</script>
+
+<script>if(window.lucide) { lucide.createIcons(); }</script>
+</body>
+</html>

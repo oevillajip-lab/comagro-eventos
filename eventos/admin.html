@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Evento — Comagro</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+      <div class="sidebar-logo-text">Comagro<br>Eventos</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">General</div>
+      <ul class="sidebar-nav">
+        <li><a href="../dashboard.html"><span class="nav-icon"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i></span> Dashboard</a></li>
+        <li><a href="./index.html" class="active"><span class="nav-icon"><i data-lucide="calendar" size="18" stroke-width="2.5"></i></span> Eventos</a></li>
+        <li><a href="./crear.html"><span class="nav-icon"><i data-lucide="plus" size="18" stroke-width="2.5"></i></span> Crear Evento</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gestión</div>
+      <ul class="sidebar-nav">
+        <li><a href="../registrados.html"><span class="nav-icon"><i data-lucide="users" size="18" stroke-width="2.5"></i></span> Registrados</a></li>
+        <li><a href="../checkin.html"><span class="nav-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></span> Check-in</a></li>
+        <li><a href="../reportes.html"><span class="nav-icon"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></span> Reportes</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Cargando...</div>
+          <div class="sidebar-user-role" id="user-role">—</div>
+        </div>
+      </div>
+      <button id="btn-logout" class="btn btn-ghost btn-full" style="margin-top:12px;color:rgba(255,255,255,.5);justify-content:flex-start;gap:8px;font-size:.8rem;"><i data-lucide="log-out" size="16" stroke-width="2.5"></i> Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-title">Panel de Evento</div>
+      <div class="topbar-actions">
+        <a href="./index.html" class="btn btn-ghost btn-sm">Volver</a>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div id="loader" class="loader-page"><div class="loader" style="border-top-color:var(--primary);border-color:var(--border);"></div></div>
+
+      <div id="event-panel" style="display:none;">
+        <div class="breadcrumb">
+          <a href="./index.html">Eventos</a>
+          <span class="sep">›</span>
+          <span id="bc-event-name">Cargando...</span>
+        </div>
+
+        <div class="page-header" style="align-items:flex-end;">
+          <div class="page-header-left">
+            <h1 id="header-name">Nombre del Evento</h1>
+            <p id="header-meta">Fecha · Tipo</p>
+          </div>
+          <div>
+            <span id="header-status" class="badge">Estado</span>
+            <button class="btn btn-secondary btn-sm" id="btn-edit-status" style="margin-left:8px;">Cambiar Estado</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;margin-bottom:28px;" class="dashboard-grid">
+          
+          <!-- Columna Izquierda: Compartir y Stats -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <!-- URL Pública -->
+            <div class="card">
+              <h3 style="margin-bottom:12px;"><i data-lucide="link" size="20" stroke-width="2.5"></i> Enlace de Inscripción</h3>
+              <p style="font-size:.85rem;color:var(--text-2);margin-bottom:12px;">Compartí este enlace con tus invitados para que puedan registrarse.</p>
+              <div style="display:flex;gap:10px;">
+                <input type="text" id="public-url" class="form-control" readonly style="background:var(--surface-2);">
+                <button class="btn btn-primary" id="btn-copy-url">Copiar</button>
+                <a href="#" id="btn-open-url" target="_blank" class="btn btn-secondary">Abrir</a>
+              </div>
+            </div>
+
+            <!-- Stats Rápidas -->
+            <div class="grid-stats" style="margin-bottom:0;">
+              <div class="stat-card" style="padding:16px;">
+                <div class="stat-icon blue" style="width:40px;height:40px;font-size:1.1rem;"><i data-lucide="users" size="18" stroke-width="2.5"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" id="s-reg" style="font-size:1.4rem;">0</div>
+                  <div class="stat-label" style="font-size:.7rem;">Registrados</div>
+                </div>
+              </div>
+              <div class="stat-card" style="padding:16px;">
+                <div class="stat-icon green" style="width:40px;height:40px;font-size:1.1rem;"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" id="s-att" style="font-size:1.4rem;">0</div>
+                  <div class="stat-label" style="font-size:.7rem;">Asistentes</div>
+                </div>
+              </div>
+              <div class="stat-card" style="padding:16px;">
+                <div class="stat-icon yellow" style="width:40px;height:40px;font-size:1.1rem;"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" id="s-pct" style="font-size:1.4rem;">0%</div>
+                  <div class="stat-label" style="font-size:.7rem;">Asistencia</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Acciones Rápidas -->
+            <div class="card">
+              <h3 style="margin-bottom:12px;"><i data-lucide="zap" size="20" stroke-width="2.5"></i> Acciones Rápidas</h3>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <a href="#" id="link-registrados" class="btn btn-secondary"><i data-lucide="users" size="18" stroke-width="2.5"></i> Ver Registrados</a>
+                <a href="#" id="link-checkin" class="btn btn-secondary"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i> Ir al Check-in</a>
+                <a href="#" id="link-reportes" class="btn btn-secondary"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i> Reportes</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Detalles del Evento -->
+          <div class="card" style="align-self:start;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+              <h3><i data-lucide="clipboard-list" size="20" stroke-width="2.5"></i> Detalles</h3>
+              <!-- Botón editar evento (opcional, para el futuro) -->
+              <span class="badge badge-gray" style="font-weight:400;">Solo lectura</span>
+            </div>
+            
+            <div id="event-banner-preview" style="border-radius:var(--radius-sm);overflow:hidden;height:120px;background:var(--surface-3);margin-bottom:16px;display:none;">
+              <img id="e-banner" src="" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+
+            <div style="font-size:.85rem;display:flex;flex-direction:column;gap:12px;">
+              <div>
+                <div style="color:var(--text-3);font-size:.75rem;margin-bottom:2px;">Fecha y Hora</div>
+                <div style="font-weight:600;" id="e-datetime">—</div>
+              </div>
+              <div>
+                <div style="color:var(--text-3);font-size:.75rem;margin-bottom:2px;">Lugar</div>
+                <div style="font-weight:600;" id="e-location">—</div>
+              </div>
+              <div>
+                <div style="color:var(--text-3);font-size:.75rem;margin-bottom:2px;">Capacidad</div>
+                <div style="font-weight:600;" id="e-capacity">—</div>
+              </div>
+              <div>
+                <div style="color:var(--text-3);font-size:.75rem;margin-bottom:2px;">Fecha Límite Inscripción</div>
+                <div style="font-weight:600;" id="e-deadline">—</div>
+              </div>
+              <div>
+                <div style="color:var(--text-3);font-size:.75rem;margin-bottom:2px;">Descripción</div>
+                <div style="color:var(--text-2);line-height:1.5;" id="e-desc">—</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal Edit Status -->
+<div class="modal-backdrop" id="modal-status">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3>Cambiar Estado</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-status').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--text-2);margin-bottom:16px;">El estado "Borrador" o "Finalizado" cerrará el formulario público de inscripción.</p>
+      <div class="form-group">
+        <label class="form-label">Estado del Evento</label>
+        <select id="sel-status" class="form-control">
+          <option value="borrador">Borrador</option>
+          <option value="activo">Activo</option>
+          <option value="finalizado">Finalizado</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-status').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-status">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+const SUPABASE_URL = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { autoRefreshToken:true, persistSession:true } });
+
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function formatDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function statusLabel(s){return {'borrador':'Borrador','activo':'Activo','finalizado':'Finalizado','capacitacion':'Capacitación','evento':'Evento','lanzamiento':'Lanzamiento','feria':'Feria','otro':'Otro'}[s]||s;}
+function statusBadge(s){return {'borrador':'badge-gray','activo':'badge-blue','finalizado':'badge-green'}[s]||'badge-gray';}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span class="toast-icon">${type==='success'?'✓':'✕'}</span><span>${sanitize(msg)}</span>`;c.appendChild(t);setTimeout(()=>t.classList.add('toast-show'),10);setTimeout(()=>{t.classList.remove('toast-show');setTimeout(()=>t.remove(),400);},3000);}
+
+let currentEvent = null;
+
+async function authGuard(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.replace('../login.html');return null;}
+  const {data:p}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  return {session,profile:p};
+}
+function renderUser(p){if(!p)return;const name=p.full_name||p.email||'U';document.getElementById('user-name').textContent=name;document.getElementById('user-role').textContent=p.role||'staff';document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+
+async function loadEventData(slug){
+  try {
+    const {data:ev,error} = await sb.from('events').select('*').eq('slug',slug).single();
+    if(error || !ev) {
+      showToast('Evento no encontrado.','error');
+      setTimeout(()=>window.location.replace('./index.html'), 2000);
+      return;
+    }
+    currentEvent = ev;
+
+    // Header & Info
+    document.getElementById('bc-event-name').textContent = ev.name;
+    document.getElementById('header-name').textContent = ev.name;
+    document.getElementById('header-meta').textContent = `${formatDate(ev.date)} · ${statusLabel(ev.type)}`;
+    
+    const badge = document.getElementById('header-status');
+    badge.className = `badge ${statusBadge(ev.status)}`;
+    badge.textContent = statusLabel(ev.status);
+
+    // Formatear Detalles
+    const timeStr = ev.time ? ` a las ${ev.time.substring(0,5)} hs` : '';
+    document.getElementById('e-datetime').textContent = formatDate(ev.date) + timeStr;
+    document.getElementById('e-location').textContent = ev.location || '—';
+    document.getElementById('e-capacity').textContent = ev.max_capacity ? ev.max_capacity.toLocaleString() + ' personas' : 'Sin límite';
+    document.getElementById('e-deadline').textContent = ev.registration_deadline ? formatDate(ev.registration_deadline) : 'Sin límite';
+    document.getElementById('e-desc').textContent = ev.description || 'Sin descripción';
+
+    if(ev.banner_url){
+      document.getElementById('e-banner').src = ev.banner_url;
+      document.getElementById('event-banner-preview').style.display = 'block';
+    }
+
+    // Enlace público
+    const baseUrl = window.location.origin;
+    // Si estás en desarrollo local sin server, puede ser problemático. Usaremos la URL actual pero apuntando a registro.html
+    const pathnameParts = window.location.pathname.split('/');
+    pathnameParts.pop(); // remove admin.html
+    pathnameParts.pop(); // remove eventos
+    const rootPath = pathnameParts.join('/') || '';
+    const publicUrl = `${baseUrl}${rootPath}/registro.html?slug=${ev.slug}`;
+    
+    document.getElementById('public-url').value = publicUrl;
+    document.getElementById('btn-open-url').href = publicUrl;
+
+    // Links rápidos
+    document.getElementById('link-registrados').href = `../registrados.html?event=${ev.id}`;
+    document.getElementById('link-checkin').href = `../checkin.html?event=${ev.id}`;
+    document.getElementById('link-reportes').href = `../reportes.html?event=${ev.id}`;
+
+    // Cargar Stats
+    const {data:regs} = await sb.from('registrations').select('status').eq('event_id',ev.id);
+    const regsArray = regs || [];
+    const totalReg = regsArray.length;
+    const totalAtt = regsArray.filter(r => r.status === 'presente').length;
+    
+    document.getElementById('s-reg').textContent = totalReg.toLocaleString('es-PY');
+    document.getElementById('s-att').textContent = totalAtt.toLocaleString('es-PY');
+    document.getElementById('s-pct').textContent = totalReg > 0 ? Math.round(totalAtt/totalReg*100)+'%' : '0%';
+
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('event-panel').style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    showToast('Error cargando el evento','error');
+  }
+}
+
+// Copiar URL
+document.getElementById('btn-copy-url').addEventListener('click', () => {
+  const input = document.getElementById('public-url');
+  input.select();
+  document.execCommand('copy');
+  showToast('Enlace copiado al portapapeles');
+});
+
+// Cambiar estado
+document.getElementById('btn-edit-status').addEventListener('click', () => {
+  document.getElementById('sel-status').value = currentEvent.status;
+  document.getElementById('modal-status').classList.add('open');
+});
+
+document.getElementById('btn-save-status').addEventListener('click', async () => {
+  const newStatus = document.getElementById('sel-status').value;
+  const btn = document.getElementById('btn-save-status');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const {error} = await sb.from('events').update({status: newStatus}).eq('id', currentEvent.id);
+  
+  btn.disabled = false;
+  btn.textContent = 'Guardar';
+  
+  if(error) {
+    showToast('Error al actualizar estado','error');
+  } else {
+    showToast('Estado actualizado exitosamente');
+    document.getElementById('modal-status').classList.remove('open');
+    currentEvent.status = newStatus;
+    const badge = document.getElementById('header-status');
+    badge.className = `badge ${statusBadge(newStatus)}`;
+    badge.textContent = statusLabel(newStatus);
+  }
+});
+
+document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('../login.html');});
+
+(async()=>{
+  const auth = await authGuard();
+  if(!auth) return;
+  renderUser(auth.profile);
+  
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  if(!slug) {
+    window.location.replace('./index.html');
+  } else {
+    await loadEventData(slug);
+  }
+})();
+</script>
+
+<script>if(window.lucide) { lucide.createIcons(); }</script>
+</body>
+</html>
