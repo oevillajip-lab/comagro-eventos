@@ -1080,9 +1080,9 @@ async function loadEventData(slug){
     document.getElementById('btn-open-url').href = publicUrl;
 
     // Links rápidos
-    document.getElementById('link-registrados').href = `../registrados.html?event=${ev.id}`;
-    document.getElementById('link-checkin').href = `../checkin.html?event=${ev.id}`;
-    document.getElementById('link-reportes').href = `../reportes.html?event=${ev.id}`;
+    document.getElementById('link-registrados').href = `/eventos-registrados?event=${ev.id}`;
+    document.getElementById('link-checkin').href = `/eventos-checkin?event=${ev.id}`;
+    document.getElementById('link-reportes').href = `/eventos-reportes?event=${ev.id}`;
 
     // Cargar Stats
     const {data:regs} = await sb.from('registrations').select('status').eq('event_id',ev.id);
