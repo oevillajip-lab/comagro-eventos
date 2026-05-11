@@ -4,25 +4,9 @@ const path = require('path');
 const cssPath = path.join(__dirname, 'assets', 'css', 'main.css');
 let cssContent = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : '';
 
-const magentoReset = `
-/* Overlay wrapper to ensure the app takes full screen inside the CMS content area */
-.comagro-app-root {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 2147483647 !important;
-  box-sizing: border-box !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  font-size: 16px !important;
-}
-`;
+const magentoReset = ``;
 
-cssContent = magentoReset + '\n' + cssContent;
+cssContent = cssContent;
 
 const outDir = path.join(__dirname, 'adobe_ready');
 if (!fs.existsSync(outDir)) {
@@ -63,12 +47,7 @@ const regexes = [
 function processFile(filePath, fileName) {
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // Replace body { with .comagro-app-root { to prevent styling the global Magento body
-  content = content.replace(/body\s*\{/g, '.comagro-app-root {');
-
-  // Wrap body content inside the breakout div
-  content = content.replace(/<body>/i, '<body>\n<div class="comagro-app-root">');
-  content = content.replace(/<\/body>/i, '</div>\n</body>');
+  // Not wrapping body content inside the breakout div anymore because #ce-root handles it
 
   // Inject CSS Reset and Styles
   const cssLinkRegex = /<link rel="stylesheet" href="[^"]*main\.css">/i;
@@ -97,8 +76,8 @@ function processFile(filePath, fileName) {
   // Fix Lucide: remove any existing createIcons call blocks and inject a reliable one
   content = content.replace(/<script>[^<]*lucide\.createIcons[^<]*<\/script>/g, '');
   content = content.replace(
-    '</div>\n</body>',
-    '<script>var _li = setInterval(function(){if(window.lucide){window.lucide.createIcons();clearInterval(_li);}}, 150);</script>\n</div>\n</body>'
+    /<\/body>/i,
+    '<script>var _li = setInterval(function(){if(window.lucide){window.lucide.createIcons();clearInterval(_li);}}, 150);</script>\n</body>'
   );
 
   // Define new filename for the exported block
