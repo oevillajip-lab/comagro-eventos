@@ -1,3 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes — Comagro Eventos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>var _rjsDef2 = window.define; window.define = undefined;</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>window.define = _rjsDef2;</script>
+  <!-- jsPDF and html2canvas for PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+
+/* Overlay wrapper to ensure the app takes full screen inside the CMS content area */
+.comagro-app-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  font-size: 16px !important;
+}
+
 /* =============================================
    COMAGRO EVENTOS — Design System Global CSS
    ============================================= */
@@ -793,3 +827,314 @@ tbody tr:hover { background: var(--surface-2); }
   .app-main { margin-left: 0 !important; }
   .page-content { padding: 0 !important; }
 }
+
+</style>
+  <script>var _rjsDef = window.define; window.define = undefined;</script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<script>window.define = _rjsDef;</script>
+</head>
+<body>
+<div class="comagro-app-root">
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar" data-html2canvas-ignore>
+    <div class="sidebar-logo">
+      <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+      <div class="sidebar-logo-text">Comagro<br>Eventos</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">General</div>
+      <ul class="sidebar-nav">
+        <li><a href="/eventos-dashboard"><span class="nav-icon"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i></span> Dashboard</a></li>
+        <li><a href="/eventos-lista"><span class="nav-icon"><i data-lucide="calendar" size="18" stroke-width="2.5"></i></span> Eventos</a></li>
+        <li><a href="/eventos-crear"><span class="nav-icon"><i data-lucide="plus" size="18" stroke-width="2.5"></i></span> Crear Evento</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gestión</div>
+      <ul class="sidebar-nav">
+        <li><a href="/eventos-registrados"><span class="nav-icon"><i data-lucide="users" size="18" stroke-width="2.5"></i></span> Registrados</a></li>
+        <li><a href="/eventos-checkin"><span class="nav-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></span> Check-in</a></li>
+        <li><a href="/eventos-reportes" class="active"><span class="nav-icon"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></span> Reportes</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Cargando...</div>
+          <div class="sidebar-user-role" id="user-role">—</div>
+        </div>
+      </div>
+      <button id="btn-logout" class="btn btn-ghost btn-full" style="margin-top:12px;color:rgba(255,255,255,.5);justify-content:flex-start;gap:8px;font-size:.8rem;"><i data-lucide="log-out" size="16" stroke-width="2.5"></i> Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar" data-html2canvas-ignore>
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-title">Reportes</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" id="btn-export-pdf" style="display:none;"><i data-lucide="file-text" size="16" stroke-width="2.5"></i> Exportar a PDF</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- Selector de evento para reporte -->
+      <div class="card" style="margin-bottom:22px;" id="event-selector" data-html2canvas-ignore>
+        <h3 style="margin-bottom:12px;">Generar Reporte de Evento</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <select id="event-select" class="form-control" style="flex:1;min-width:200px;">
+            <option value="">— Elegir evento —</option>
+          </select>
+          <button class="btn btn-primary" id="btn-load-report">Generar</button>
+        </div>
+      </div>
+
+      <!-- Área exportable -->
+      <div id="report-content" style="display:none; background:#fff; padding:32px; border-radius:var(--radius-lg); border:1px solid var(--border);">
+        <!-- Report Header (Comagro Branding) -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--primary); padding-bottom:16px; margin-bottom:24px;">
+          <div>
+            <h1 id="r-event-name" style="color:var(--primary); font-size:1.6rem; margin-bottom:6px;">Nombre del Evento</h1>
+            <div style="color:var(--text-2); font-size:.9rem; display:flex; gap:16px;">
+              <span id="r-event-date"><i data-lucide="calendar" size="18" stroke-width="2.5"></i> Fecha</span>
+              <span id="r-event-location"><i data-lucide="map-pin" size="16" stroke-width="2"></i> Lugar</span>
+            </div>
+          </div>
+          <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro" style="height:46px;">
+        </div>
+
+        <div style="margin-bottom:32px;">
+          <h3 style="margin-bottom:16px; color:var(--text-1); font-size:1.1rem;">Resumen de Asistencia</h3>
+          <div class="grid-stats">
+            <div class="stat-card" style="box-shadow:none; background:var(--surface-2);">
+              <div class="stat-icon blue"><i data-lucide="users" size="18" stroke-width="2.5"></i></div>
+              <div class="stat-body">
+                <div class="stat-value" id="r-total">0</div>
+                <div class="stat-label">Total Inscriptos</div>
+              </div>
+            </div>
+            <div class="stat-card" style="box-shadow:none; background:var(--success-bg);">
+              <div class="stat-icon green"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></div>
+              <div class="stat-body">
+                <div class="stat-value" id="r-present" style="color:var(--success);">0</div>
+                <div class="stat-label">Presentes</div>
+              </div>
+            </div>
+            <div class="stat-card" style="box-shadow:none; background:var(--danger-bg);">
+              <div class="stat-icon red"><i data-lucide="x-circle" size="18" stroke-width="2.5"></i></div>
+              <div class="stat-body">
+                <div class="stat-value" id="r-absent" style="color:var(--danger);">0</div>
+                <div class="stat-label">Ausentes</div>
+              </div>
+            </div>
+            <div class="stat-card" style="box-shadow:none; background:var(--surface-2);">
+              <div class="stat-icon blue"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></div>
+              <div class="stat-body">
+                <div class="stat-value" id="r-pct">0%</div>
+                <div class="stat-label">% Asistencia</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px;" class="charts-row">
+          <div>
+            <h3 style="margin-bottom:16px; font-size:1rem; text-align:center;">Estado de Registros</h3>
+            <div style="position:relative; height:240px; width:100%;">
+              <canvas id="chart-status"></canvas>
+            </div>
+          </div>
+          <div>
+            <h3 style="margin-bottom:16px; font-size:1rem; text-align:center;">Top Empresas Participantes</h3>
+            <div style="position:relative; height:240px; width:100%;">
+              <canvas id="chart-companies"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border); padding-top:16px; text-align:center; font-size:.75rem; color:var(--text-3);">
+          Reporte generado automáticamente por la Plataforma de Eventos Comagro el <span id="r-timestamp"></span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script>
+const SUPABASE_URL='https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0eWxwdnV6ZmxxbG1tcXZkaGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjYzMTgsImV4cCI6MjA5MTg0MjMxOH0.yuZ5sWX-Isxd04ySP_ZgDLit1fQDsxoeb25GmU_C_5I';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true}});
+
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function formatDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span class="toast-icon">${type==='success'?'✓':'✕'}</span><span>${sanitize(msg)}</span>`;c.appendChild(t);setTimeout(()=>t.classList.add('toast-show'),10);setTimeout(()=>{t.classList.remove('toast-show');setTimeout(()=>t.remove(),400);},3000);}
+
+let chartStatusInst = null;
+let chartCompaniesInst = null;
+let currentEventName = '';
+
+async function authGuard(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.replace('/eventos-login');return null;}
+  const {data:p}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  return {session,profile:p};
+}
+function renderUser(p){if(!p)return;const name=p.full_name||p.email||'U';document.getElementById('user-name').textContent=name;document.getElementById('user-role').textContent=p.role||'staff';document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+
+async function loadReport(eventId) {
+  if(!eventId) return;
+  const btn = document.getElementById('btn-load-report');
+  btn.textContent = 'Cargando...';
+  btn.disabled = true;
+
+  try {
+    const {data:ev} = await sb.from('events').select('*').eq('id',eventId).single();
+    if(!ev) throw new Error("Event not found");
+
+    currentEventName = ev.name;
+
+    document.getElementById('r-event-name').textContent = ev.name;
+    document.getElementById('r-event-date').textContent = `<i data-lucide="calendar" size="18" stroke-width="2.5"></i> ${formatDate(ev.date)}`;
+    document.getElementById('r-event-location').textContent = `<i data-lucide="map-pin" size="16" stroke-width="2"></i> ${ev.location || 'Sin ubicación'}`;
+    document.getElementById('r-timestamp').textContent = new Date().toLocaleString('es-PY');
+
+    const {data:regs} = await sb.from('registrations').select('status, company').eq('event_id',eventId);
+    const total = regs.length;
+    const present = regs.filter(r=>r.status==='presente').length;
+    const prereg = regs.filter(r=>r.status==='preregistro').length;
+    const conf = regs.filter(r=>r.status==='confirmado').length;
+    const absent = regs.filter(r=>r.status==='ausente').length;
+    // For chart logic: Pending = prereg + conf. Absent = explicitly marked ausente. Total not present = total - present
+    // Let's keep it simple for the top row:
+    const pct = total>0 ? Math.round((present/total)*100) : 0;
+
+    document.getElementById('r-total').textContent = total.toLocaleString('es-PY');
+    document.getElementById('r-present').textContent = present.toLocaleString('es-PY');
+    document.getElementById('r-absent').textContent = (total - present).toLocaleString('es-PY'); // Anyone not present is considered missing essentially
+    document.getElementById('r-pct').textContent = pct + '%';
+
+    // Chart: Status
+    if(chartStatusInst) chartStatusInst.destroy();
+    chartStatusInst = new Chart(document.getElementById('chart-status'), {
+      type: 'pie',
+      data: {
+        labels: ['Presentes', 'Pendientes', 'Ausentes'],
+        datasets: [{
+          data: [present, prereg + conf, absent],
+          backgroundColor: ['#16a34a', '#d97706', '#dc2626'],
+          borderWidth: 1, borderColor: '#fff'
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Chart: Companies (Top 5)
+    const compCount = {};
+    regs.forEach(r => {
+      const c = (r.company || 'Particular').trim().toUpperCase();
+      compCount[c] = (compCount[c]||0) + 1;
+    });
+    const sortedComps = Object.entries(compCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    
+    if(chartCompaniesInst) chartCompaniesInst.destroy();
+    chartCompaniesInst = new Chart(document.getElementById('chart-companies'), {
+      type: 'bar',
+      data: {
+        labels: sortedComps.map(x=>x[0].substring(0,15)),
+        datasets: [{
+          label: 'Inscriptos',
+          data: sortedComps.map(x=>x[1]),
+          backgroundColor: '#1f2f6b',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+
+    document.getElementById('report-content').style.display = 'block';
+    document.getElementById('btn-export-pdf').style.display = 'inline-flex';
+
+  } catch (err) {
+    console.error(err);
+    showToast('Error al generar reporte','error');
+  }
+
+  btn.textContent = 'Generar';
+  btn.disabled = false;
+}
+
+// PDF Export logic
+document.getElementById('btn-export-pdf').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-export-pdf');
+  btn.textContent = 'Generando PDF...';
+  btn.disabled = true;
+
+  try {
+    const element = document.getElementById('report-content');
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+    
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Reporte-${currentEventName.replace(/\s/g,'-')}.pdf`);
+    
+    showToast('Reporte exportado exitosamente');
+  } catch(err) {
+    console.error(err);
+    showToast('Error al generar PDF','error');
+  }
+
+  btn.innerHTML = '<i data-lucide="file-text" size="16" stroke-width="2.5"></i> Exportar a PDF';
+  btn.disabled = false;
+});
+
+document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
+document.getElementById('btn-load-report').addEventListener('click', () => {
+  loadReport(document.getElementById('event-select').value);
+});
+
+(async()=>{
+  const auth = await authGuard();
+  if(!auth) return;
+  renderUser(auth.profile);
+  
+  const {data:events}=await sb.from('events').select('id,name,date').order('date',{ascending:false});
+  const sel=document.getElementById('event-select');
+  (events||[]).forEach(e=>{
+    const o=document.createElement('option');
+    o.value=e.id;
+    o.textContent=`${e.name} (${new Date(e.date+'T00:00:00').toLocaleDateString('es-PY')})`;
+    sel.appendChild(o);
+  });
+
+  const paramEvent=new URLSearchParams(window.location.search).get('event');
+  if(paramEvent) {
+    sel.value = paramEvent;
+    loadReport(paramEvent);
+  }
+})();
+</script>
+<style>
+  @media (max-width: 768px) {
+    .charts-row { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+
+<script>var _li = setInterval(function(){if(window.lucide){window.lucide.createIcons();clearInterval(_li);}}, 150);</script>
+</div>
+</body>
+</html>

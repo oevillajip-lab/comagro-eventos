@@ -11,6 +11,24 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
   <script>window.define = _rjsDef;</script>
   <style>
+
+/* Overlay wrapper to ensure the app takes full screen inside the CMS content area */
+.comagro-app-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  font-size: 16px !important;
+}
+
+
     html { font-size: 16px !important; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -18,7 +36,7 @@
       --border: #e2e7f4; --text-1: #1a1f36; --text-2: #6f7b87; --text-3: #9aa3b0;
       --danger: #dc2626; --success: #16a34a;
     }
-    body {
+    .comagro-app-root {
       font-family: 'Inter', system-ui, sans-serif;
       background: linear-gradient(145deg, #f0f3ff 0%, #eef1fb 60%, #f7f8fc 100%);
       min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
@@ -71,6 +89,7 @@
   </style>
 </head>
 <body>
+<div class="comagro-app-root">
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
 
@@ -132,163 +151,8 @@
     </div>
   </div>
 
-  <script>
-    lucide.createIcons();
-
-    const SUPABASE_URL  = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
-    const SUPABASE_KEY  = 'sb_publishable_7ZT8qNtk0oNRs2_8fmhyzA_gLzdVDNc';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { autoRefreshToken: true, persistSession: true }
-    });
-
-    function showStatus(msg, type) {
-      const el = document.getElementById('login-status');
-      el.className = 'status-msg show ' + type;
-      el.textContent = msg;
-    }
-
-    (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) { window.location.replace('./dashboard.html'); }
-    })();
-
-    let isSuperUser = false;
-
-    document.getElementById('form-login').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      document.getElementById('login-status').className = 'status-msg';
-
-      const emailField = document.getElementById('login-email');
-      const pinField = document.getElementById('login-pin');
-      const btn = document.getElementById('btn-login');
-      const btnText = document.getElementById('btn-login-text');
-
-      // --- STEP 2: If superuser, verify PIN ---
-      if (isSuperUser && pinField) {
-        const pin = pinField.value.trim();
-        if (!pin) {
-          showStatus('Ingresá tu PIN de acceso.', 'error');
-          return;
-        }
-
-        btn.disabled = true;
-        btnText.textContent = 'Verificando...';
-
-        const { error } = await sb.auth.signInWithPassword({
-          email: emailField.value.trim().toLowerCase(),
-          password: pin
-        });
-
-        btn.disabled = false;
-        btnText.textContent = 'Ingresar con PIN';
-
-        if (error) {
-          showStatus('PIN incorrecto.', 'error');
-        }
-        // Si no hay error, el getSession al inicio redirige automáticamente
-        // Pero por si acaso, redirigimos manualmente:
-        if (!error) {
-          window.location.replace('./dashboard.html');
-        }
-        return;
-      }
-
-      // --- STEP 1: Check email ---
-      const email = emailField.value.trim().toLowerCase();
-
-      if (!email) {
-        showStatus('Ingresá tu correo corporativo.', 'error');
-        return;
-      }
-      if (!/^[a-zA-Z0-9._%+-]+@comagro\.com\.py$/i.test(email)) {
-        showStatus('Solo se permiten correos @comagro.com.py', 'error');
-        return;
-      }
-
-      btn.disabled = true;
-      btnText.textContent = 'Verificando...';
-
-      // Check if super user exists in super_users table
-      try {
-        const { data: superData } = await sb
-          .from('super_users')
-          .select('email')
-          .eq('email', email)
-          .maybeSingle();
-
-        if (superData) {
-          // Es super user → mostrar campo PIN
-          isSuperUser = true;
-          btn.disabled = false;
-
-          emailField.style.display = 'none';
-          
-          // Create PIN input if not exists
-          if (!document.getElementById('login-pin')) {
-            const pinInput = document.createElement('input');
-            pinInput.type = 'password';
-            pinInput.id = 'login-pin';
-            pinInput.className = emailField.className;
-            pinInput.placeholder = '••••••';
-            pinInput.maxLength = 10;
-            pinInput.style.textAlign = 'center';
-            pinInput.style.fontSize = '1.2rem';
-            pinInput.style.letterSpacing = '4px';
-            emailField.parentNode.insertBefore(pinInput, emailField.nextSibling);
-            pinInput.focus();
-          }
-
-          btnText.textContent = 'Ingresar con PIN';
-          showStatus('Ingresá tu PIN de acceso.', 'success');
-
-          // Add "Usar otro correo" link
-          if (!document.getElementById('link-otro-correo')) {
-            const link = document.createElement('a');
-            link.id = 'link-otro-correo';
-            link.href = '#';
-            link.textContent = 'Usar otro correo';
-            link.style.cssText = 'display:block;text-align:center;margin-top:12px;font-size:.82rem;color:var(--primary);text-decoration:underline;cursor:pointer;';
-            link.addEventListener('click', function(ev) {
-              ev.preventDefault();
-              isSuperUser = false;
-              emailField.style.display = '';
-              const p = document.getElementById('login-pin');
-              if (p) p.remove();
-              this.remove();
-              btnText.textContent = 'Enviar enlace de acceso';
-              document.getElementById('login-status').className = 'status-msg';
-            });
-            btn.parentNode.appendChild(link);
-          }
-          return;
-        }
-      } catch (e) {
-        // Si la tabla no existe o falla, seguir con OTP normal
-        console.log('super_users check:', e);
-      }
-
-      // Not super user → OTP magic link
-      isSuperUser = false;
-      btnText.textContent = 'Enviando enlace...';
-
-      const { error } = await sb.auth.signInWithOtp({
-        email: email,
-        options: {
-          emailRedirectTo: window.location.origin + "/dashboard.html"
-        }
-      });
-
-      btn.disabled = false;
-      btnText.textContent = 'Enviar enlace de acceso';
-
-      if (error) {
-        showStatus('No fue posible enviar el enlace.', 'error');
-        return;
-      }
-
-      showStatus('¡Listo! Revisá tu correo corporativo y abrí el enlace para entrar.', 'success');
-      emailField.value = '';
-    });
-  </script>
+  
+<script>var _li = setInterval(function(){if(window.lucide){window.lucide.createIcons();clearInterval(_li);}}, 150);</script>
+</div>
 </body>
 </html>

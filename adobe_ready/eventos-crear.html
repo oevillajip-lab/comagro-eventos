@@ -1,3 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Evento — Comagro</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+/* Overlay wrapper to ensure the app takes full screen inside the CMS content area */
+.comagro-app-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  font-size: 16px !important;
+}
+
 /* =============================================
    COMAGRO EVENTOS — Design System Global CSS
    ============================================= */
@@ -793,3 +821,310 @@ tbody tr:hover { background: var(--surface-2); }
   .app-main { margin-left: 0 !important; }
   .page-content { padding: 0 !important; }
 }
+
+</style>
+  <script>var _rjsDef = window.define; window.define = undefined;</script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<script>window.define = _rjsDef;</script>
+</head>
+<body>
+<div class="comagro-app-root">
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+      <div class="sidebar-logo-text">Comagro<br>Eventos</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">General</div>
+      <ul class="sidebar-nav">
+        <li><a href="/eventos-dashboard"><span class="nav-icon"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i></span> Dashboard</a></li>
+        <li><a href="/eventos-lista"><span class="nav-icon"><i data-lucide="calendar" size="18" stroke-width="2.5"></i></span> Eventos</a></li>
+        <li><a href="/eventos-crear" class="active"><span class="nav-icon"><i data-lucide="plus" size="18" stroke-width="2.5"></i></span> Crear Evento</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gestión</div>
+      <ul class="sidebar-nav">
+        <li><a href="/eventos-registrados"><span class="nav-icon"><i data-lucide="users" size="18" stroke-width="2.5"></i></span> Registrados</a></li>
+        <li><a href="/eventos-checkin"><span class="nav-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></span> Check-in</a></li>
+        <li><a href="/eventos-reportes"><span class="nav-icon"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></span> Reportes</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Cargando...</div>
+          <div class="sidebar-user-role" id="user-role">—</div>
+        </div>
+      </div>
+      <button id="btn-logout" class="btn btn-ghost btn-full" style="margin-top:12px;color:rgba(255,255,255,.5);justify-content:flex-start;gap:8px;font-size:.8rem;">
+        <i data-lucide="log-out" size="16" stroke-width="2.5"></i> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-title">Crear Evento</div>
+    </header>
+
+    <main class="page-content">
+      <div class="breadcrumb">
+        <a href="/eventos-lista">Eventos</a>
+        <span class="sep">›</span>
+        <span>Crear Evento</span>
+      </div>
+
+      <div style="max-width:720px;">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>Nuevo Evento</h1>
+            <p>Completá los datos para crear el evento. El slug y la URL pública se generarán automáticamente.</p>
+          </div>
+        </div>
+
+        <form id="form-crear" novalidate>
+
+          <!-- Sección: Información básica -->
+          <div class="card" style="margin-bottom:20px;">
+            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);"><i data-lucide="clipboard-list" size="20" stroke-width="2.5"></i> Información básica</h3>
+
+            <div class="form-group">
+              <label class="form-label" for="ev-name">Nombre del evento <span class="req">*</span></label>
+              <input type="text" id="ev-name" class="form-control" placeholder="Ej: Lanzamiento Terasaki 2026" maxlength="150" required>
+            </div>
+
+            <!-- Slug preview -->
+            <div class="form-group">
+              <label class="form-label">URL pública generada</label>
+              <div style="display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;height:40px;font-size:.875rem;color:var(--text-2);">
+                <span style="color:var(--text-3);white-space:nowrap;">tudominio.com/registro.html?slug=</span>
+                <strong id="slug-preview" style="color:var(--primary);">—</strong>
+              </div>
+              <div class="form-hint">Se genera automáticamente al escribir el nombre.</div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="ev-type">Tipo <span class="req">*</span></label>
+                <select id="ev-type" class="form-control" required>
+                  <option value="">Seleccionar tipo</option>
+                  <option value="evento">Evento</option>
+                  <option value="capacitacion">Capacitación</option>
+                  <option value="lanzamiento">Lanzamiento</option>
+                  <option value="feria">Feria</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ev-status">Estado inicial</label>
+                <select id="ev-status" class="form-control">
+                  <option value="borrador">Borrador</option>
+                  <option value="activo">Activo</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ev-desc">Descripción</label>
+              <textarea id="ev-desc" class="form-control" rows="3" placeholder="Descripción del evento, agenda, detalles importantes..." maxlength="2000"></textarea>
+            </div>
+          </div>
+
+          <!-- Sección: Fecha y Lugar -->
+          <div class="card" style="margin-bottom:20px;">
+            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);"><i data-lucide="map-pin" size="16" stroke-width="2"></i> Fecha y Lugar</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="ev-date">Fecha <span class="req">*</span></label>
+                <input type="date" id="ev-date" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ev-time">Hora</label>
+                <input type="time" id="ev-time" class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ev-location">Lugar / Dirección</label>
+              <input type="text" id="ev-location" class="form-control" placeholder="Ej: Salón Comagro, Av. España 1234, Asunción" maxlength="250">
+            </div>
+          </div>
+
+          <!-- Sección: Capacidad e Inscripción -->
+          <div class="card" style="margin-bottom:20px;">
+            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);"><i data-lucide="users" size="18" stroke-width="2.5"></i> Capacidad e Inscripción</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="ev-capacity">Cupo máximo <span class="req">*</span></label>
+                <input type="number" id="ev-capacity" class="form-control" placeholder="100" min="1" max="10000" value="100" required>
+                <div class="form-hint">Número máximo de inscriptos permitidos.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ev-deadline">Fecha límite de inscripción</label>
+                <input type="date" id="ev-deadline" class="form-control">
+                <div class="form-hint">Dejá vacío para no tener límite.</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ev-banner">URL del banner / imagen</label>
+              <input type="url" id="ev-banner" class="form-control" placeholder="https://..." maxlength="500">
+              <div class="form-hint">Enlace directo a imagen JPG, PNG o WebP.</div>
+            </div>
+
+            <!-- Banner preview -->
+            <div id="banner-preview" style="display:none;margin-top:10px;border-radius:var(--radius);overflow:hidden;height:140px;background:var(--surface-3);">
+              <img id="banner-img" src="" alt="Preview" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+          </div>
+
+          <!-- Error / Success -->
+          <div id="form-status" style="display:none;margin-bottom:16px;"></div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-submit">
+              <span id="btn-submit-text">✓ Crear Evento</span>
+            </button>
+            <a href="/eventos-lista" class="btn btn-secondary btn-lg">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script>
+const SUPABASE_URL = 'https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0eWxwdnV6ZmxxbG1tcXZkaGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjYzMTgsImV4cCI6MjA5MTg0MjMxOH0.yuZ5sWX-Isxd04ySP_ZgDLit1fQDsxoeb25GmU_C_5I';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { autoRefreshToken:true, persistSession:true } });
+
+/* ---- Utils ---- */
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function slugify(t){return t.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');}
+function showStatus(msg,type){
+  const el=document.getElementById('form-status');
+  el.className=`alert alert-${type}`;
+  el.textContent=msg;
+  el.style.display='flex';
+}
+
+/* ---- Auth guard ---- */
+async function authGuard(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.replace('/eventos-login');return null;}
+  const {data:p}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  return {session,profile:p};
+}
+function renderUser(p){
+  if(!p)return;
+  const name=p.full_name||p.email||'Usuario';
+  document.getElementById('user-name').textContent=name;
+  document.getElementById('user-role').textContent=p.role||'staff';
+  document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+}
+
+/* ---- Slug auto-generate ---- */
+document.getElementById('ev-name').addEventListener('input', function(){
+  const slug = slugify(this.value);
+  document.getElementById('slug-preview').textContent = slug || '—';
+});
+
+/* ---- Banner preview ---- */
+let bannerTimeout;
+document.getElementById('ev-banner').addEventListener('input', function(){
+  clearTimeout(bannerTimeout);
+  bannerTimeout = setTimeout(()=>{
+    const url=this.value.trim();
+    const preview=document.getElementById('banner-preview');
+    const img=document.getElementById('banner-img');
+    if(url){img.src=url;preview.style.display='block';}
+    else{preview.style.display='none';}
+  },600);
+});
+
+/* ---- Form submit ---- */
+document.getElementById('form-crear').addEventListener('submit', async function(e){
+  e.preventDefault();
+  document.getElementById('form-status').style.display='none';
+
+  const name    = document.getElementById('ev-name').value.trim();
+  const type    = document.getElementById('ev-type').value;
+  const status  = document.getElementById('ev-status').value;
+  const desc    = document.getElementById('ev-desc').value.trim();
+  const date    = document.getElementById('ev-date').value;
+  const time    = document.getElementById('ev-time').value || null;
+  const location= document.getElementById('ev-location').value.trim() || null;
+  const capacity= parseInt(document.getElementById('ev-capacity').value)||100;
+  const deadline= document.getElementById('ev-deadline').value || null;
+  const banner  = document.getElementById('ev-banner').value.trim() || null;
+  const slug    = slugify(name);
+
+  if(!name){showStatus('El nombre del evento es obligatorio.','danger');return;}
+  if(!type){showStatus('Seleccioná el tipo de evento.','danger');return;}
+  if(!date){showStatus('La fecha del evento es obligatoria.','danger');return;}
+  if(!slug){showStatus('El nombre no genera un slug válido.','danger');return;}
+
+  const btn=document.getElementById('btn-submit');
+  const txt=document.getElementById('btn-submit-text');
+  btn.disabled=true;
+  txt.innerHTML='<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;"></span> Creando...';
+
+  try {
+    const session=(await sb.auth.getSession()).data.session;
+
+    // Check slug unique
+    const {data:existing}=await sb.from('events').select('id').eq('slug',slug).maybeSingle();
+    if(existing){
+      const ts=Date.now().toString(36);
+      // append timestamp to ensure uniqueness
+      const uniqueSlug=slug+'-'+ts;
+      document.getElementById('slug-preview').textContent=uniqueSlug;
+    }
+
+    const finalSlug=document.getElementById('slug-preview').textContent;
+
+    const {data:ev,error}=await sb.from('events').insert({
+      name,slug:finalSlug,type,status,description:desc||null,
+      date,time,location,max_capacity:capacity,
+      registration_deadline:deadline,banner_url:banner,
+      created_by:session.user.id
+    }).select().single();
+
+    if(error) throw error;
+
+    showStatus('✓ Evento creado correctamente. Redirigiendo...','success');
+    setTimeout(()=>window.location.replace('/eventos-admin?slug='+encodeURIComponent(ev.slug)),1200);
+  } catch(err){
+    btn.disabled=false;
+    txt.textContent='✓ Crear Evento';
+    showStatus('Error al crear el evento: '+(err.message||'intentá de nuevo.'),'danger');
+  }
+});
+
+document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
+
+(async()=>{
+  const auth=await authGuard();
+  if(!auth)return;
+  renderUser(auth.profile);
+  // Set min date to today
+  document.getElementById('ev-date').min=new Date().toISOString().split('T')[0];
+  document.getElementById('ev-deadline').min=new Date().toISOString().split('T')[0];
+})();
+</script>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
+
+<script>var _li = setInterval(function(){if(window.lucide){window.lucide.createIcons();clearInterval(_li);}}, 150);</script>
+</div>
+</body>
+</html>

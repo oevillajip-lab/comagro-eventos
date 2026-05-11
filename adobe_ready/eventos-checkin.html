@@ -1,3 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-in — Comagro Eventos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+/* Overlay wrapper to ensure the app takes full screen inside the CMS content area */
+.comagro-app-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  font-size: 16px !important;
+}
+
 /* =============================================
    COMAGRO EVENTOS — Design System Global CSS
    ============================================= */
@@ -793,3 +821,280 @@ tbody tr:hover { background: var(--surface-2); }
   .app-main { margin-left: 0 !important; }
   .page-content { padding: 0 !important; }
 }
+
+</style>
+  <style>
+    .checkin-header{background:var(--primary);color:#fff;padding:20px 28px;border-radius:var(--radius-lg);margin-bottom:22px;}
+    .checkin-header h2{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:4px;}
+    .checkin-header p{font-size:.82rem;color:rgba(255,255,255,.7);margin:0;}
+    .checkin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+    .checkin-stat{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;}
+    .checkin-stat .num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.6rem;color:var(--primary);}
+    .checkin-stat .lbl{font-size:.72rem;color:var(--text-2);font-weight:500;margin-top:2px;}
+    .attendee-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--border-light);transition:background .12s;}
+    .attendee-row:last-child{border-bottom:none;}
+    .attendee-row:hover{background:var(--surface-2);}
+    .attendee-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;font-family:'Montserrat',sans-serif;}
+    .attendee-info{flex:1;min-width:0;}
+    .attendee-name{font-weight:600;font-size:.9rem;color:var(--text-1);}
+    .attendee-sub{font-size:.75rem;color:var(--text-3);margin-top:2px;}
+    .btn-present{height:36px;padding:0 16px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:.8rem;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap;}
+    .btn-present:hover{background:#15803d;}
+    .btn-present:active{transform:scale(.96);}
+    .btn-present:disabled{opacity:.5;cursor:not-allowed;}
+    .present-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--success-bg);color:var(--success);border-radius:99px;font-size:.75rem;font-weight:700;}
+    .present-time{font-size:.7rem;color:var(--text-3);margin-top:2px;}
+    .search-bar{margin-bottom:16px;}
+  </style>
+  <script>var _rjsDef = window.define; window.define = undefined;</script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<script>window.define = _rjsDef;</script>
+</head>
+<body>
+<div class="comagro-app-root">
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro">
+      <div class="sidebar-logo-text">Comagro<br>Eventos</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">General</div>
+      <ul class="sidebar-nav">
+        <li><a href="/eventos-dashboard"><span class="nav-icon"><i data-lucide="bar-chart-3" size="18" stroke-width="2.5"></i></span> Dashboard</a></li>
+        <li><a href="/eventos-lista"><span class="nav-icon"><i data-lucide="calendar" size="18" stroke-width="2.5"></i></span> Eventos</a></li>
+        <li><a href="/eventos-crear"><span class="nav-icon"><i data-lucide="plus" size="18" stroke-width="2.5"></i></span> Crear Evento</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gestión</div>
+      <ul class="sidebar-nav">
+        <li><a href="/eventos-registrados"><span class="nav-icon"><i data-lucide="users" size="18" stroke-width="2.5"></i></span> Registrados</a></li>
+        <li><a href="/eventos-checkin" class="active"><span class="nav-icon"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></span> Check-in</a></li>
+        <li><a href="/eventos-reportes"><span class="nav-icon"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></span> Reportes</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar" id="user-avatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Cargando...</div>
+          <div class="sidebar-user-role" id="user-role">—</div>
+        </div>
+      </div>
+      <button id="btn-logout" class="btn btn-ghost btn-full" style="margin-top:12px;color:rgba(255,255,255,.5);justify-content:flex-start;gap:8px;font-size:.8rem;"><i data-lucide="log-out" size="16" stroke-width="2.5"></i> Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <div class="topbar-title" id="topbar-title">Check-in</div>
+    </header>
+
+    <main class="page-content">
+      <!-- Event selector -->
+      <div class="card" style="margin-bottom:22px;" id="event-selector">
+        <h3 style="margin-bottom:14px;">Seleccionar evento</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <select id="event-select" class="form-control" style="flex:1;min-width:220px;">
+            <option value="">— Elegir evento —</option>
+          </select>
+          <button class="btn btn-primary" id="btn-load-event">Cargar Check-in</button>
+        </div>
+      </div>
+
+      <!-- Check-in panel -->
+      <div id="checkin-panel" style="display:none;">
+        <div class="checkin-header">
+          <h2 id="ci-event-name">Evento</h2>
+          <p id="ci-event-meta">Fecha · Lugar</p>
+        </div>
+
+        <div class="checkin-stats">
+          <div class="checkin-stat">
+            <div class="num" id="ci-total">0</div>
+            <div class="lbl">Registrados</div>
+          </div>
+          <div class="checkin-stat">
+            <div class="num" id="ci-present" style="color:var(--success);">0</div>
+            <div class="lbl">Presentes</div>
+          </div>
+          <div class="checkin-stat">
+            <div class="num" id="ci-pct" style="color:var(--warning);">0%</div>
+            <div class="lbl">Asistencia</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div class="search-input-wrap" style="flex:1;margin:0;">
+              <span class="search-icon"><i data-lucide="search" size="18" stroke-width="2.5"></i></span>
+              <input type="text" id="ci-search" class="search-input" placeholder="Buscar por nombre, apellido, empresa o ID...">
+            </div>
+            <select id="ci-filter" class="form-control" style="width:auto;height:38px;">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="presente">Presentes</option>
+            </select>
+          </div>
+          <div id="attendee-list">
+            <div class="loader-page" style="min-height:200px;"><div class="loader" style="border-top-color:var(--primary);border-color:var(--border);"></div></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script>
+const SUPABASE_URL='https://itylpvuzflqlmmqvdhbz.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0eWxwdnV6ZmxxbG1tcXZkaGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjYzMTgsImV4cCI6MjA5MTg0MjMxOH0.yuZ5sWX-Isxd04ySP_ZgDLit1fQDsxoeb25GmU_C_5I';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true}});
+
+function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
+function formatDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function formatDateTime(iso){if(!iso)return '—';const d=new Date(iso);return d.toLocaleTimeString('es-PY',{hour:'2-digit',minute:'2-digit'});}
+
+function showToast(msg,type='success'){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
+  t.innerHTML=`<span class="toast-icon">${type==='success'?'✓':'✕'}</span><span>${sanitize(msg)}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>t.classList.add('toast-show'),10);
+  setTimeout(()=>{t.classList.remove('toast-show');setTimeout(()=>t.remove(),400);},3000);
+}
+
+let allRegs=[], currentSession=null, currentEventId=null;
+
+async function authGuard(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.replace('/eventos-login');return null;}
+  const {data:p}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  return {session,profile:p};
+}
+function renderUser(p){
+  if(!p)return;
+  const name=p.full_name||p.email||'U';
+  document.getElementById('user-name').textContent=name;
+  document.getElementById('user-role').textContent=p.role||'staff';
+  document.getElementById('user-avatar').textContent=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+}
+
+async function loadEventList(){
+  const {data:events}=await sb.from('events').select('id,name,date,slug').order('date',{ascending:false});
+  const sel=document.getElementById('event-select');
+  (events||[]).forEach(e=>{
+    const opt=document.createElement('option');
+    opt.value=e.id;
+    opt.textContent=`${e.name} (${formatDate(e.date)})`;
+    sel.appendChild(opt);
+  });
+  // Auto-load from URL param
+  const paramEvent=new URLSearchParams(window.location.search).get('event');
+  if(paramEvent){sel.value=paramEvent;await loadCheckin(paramEvent);}
+}
+
+function renderList(){
+  const q=document.getElementById('ci-search').value.toLowerCase();
+  const f=document.getElementById('ci-filter').value;
+  const filtered=allRegs.filter(r=>{
+    const matchQ=!q||(r.first_name+' '+r.last_name).toLowerCase().includes(q)||
+      (r.company||'').toLowerCase().includes(q)||
+      (r.email||'').toLowerCase().includes(q)||
+      (r.short_id||'').toLowerCase().includes(q);
+    const matchF=!f||(f==='presente'&&r.status==='presente')||(f==='pendiente'&&r.status!=='presente');
+    return matchQ&&matchF;
+  });
+
+  const total=allRegs.length;
+  const present=allRegs.filter(r=>r.status==='presente').length;
+  document.getElementById('ci-total').textContent=total;
+  document.getElementById('ci-present').textContent=present;
+  document.getElementById('ci-pct').textContent=(total>0?Math.round(present/total*100):0)+'%';
+
+  const list=document.getElementById('attendee-list');
+  if(filtered.length===0){
+    list.innerHTML=`<div class="empty-state" style="padding:40px;"><div class="empty-state-icon"><i data-lucide="user" size="48" stroke-width="1.5"></i></div><h3>Sin resultados</h3></div>`;
+    return;
+  }
+  list.innerHTML=filtered.map(r=>{
+    const initials=(r.first_name[0]||'')+(r.last_name[0]||'');
+    const isPresent=r.status==='presente';
+    return `<div class="attendee-row" id="row-${r.id}">
+      <div class="attendee-avatar">${sanitize(initials.toUpperCase())}</div>
+      <div class="attendee-info">
+        <div class="attendee-name">${sanitize(r.first_name+' '+r.last_name)}</div>
+        <div class="attendee-sub">${sanitize(r.company||'—')} · ${sanitize(r.email)} · <strong>#${sanitize(r.short_id)}</strong></div>
+        ${isPresent?`<div class="present-time">✓ Presente ${formatDateTime(r.attended_at)}</div>`:''}
+      </div>
+      <div>
+        ${isPresent
+          ? `<span class="present-badge"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i> Presente</span>`
+          : `<button class="btn-present" onclick="markPresent('${r.id}')">✓ PRESENTE</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadCheckin(eventId){
+  currentEventId=eventId;
+  const {data:ev}=await sb.from('events').select('*').eq('id',eventId).single();
+  if(!ev)return;
+  document.getElementById('topbar-title').textContent='Check-in — '+ev.name;
+  document.getElementById('ci-event-name').textContent=ev.name;
+  document.getElementById('ci-event-meta').textContent=`${formatDate(ev.date)} · ${ev.location||'Sin ubicación'}`;
+
+  const {data:regs}=await sb.from('registrations').select('*').eq('event_id',eventId).order('last_name');
+  allRegs=regs||[];
+  document.getElementById('checkin-panel').style.display='block';
+  renderList();
+}
+
+async function markPresent(regId){
+  const btn=document.querySelector(`#row-${regId} .btn-present`);
+  if(btn){btn.disabled=true;btn.textContent='...';}
+
+  const now=new Date().toISOString();
+  const {error}=await sb.from('registrations').update({
+    status:'presente',
+    attended_at:now,
+    attended_by:currentSession?.user?.id||null
+  }).eq('id',regId);
+
+  if(error){showToast('Error al registrar asistencia.','error');if(btn){btn.disabled=false;btn.textContent='✓ PRESENTE';}return;}
+
+  // Update local state
+  const reg=allRegs.find(r=>r.id===regId);
+  if(reg){reg.status='presente';reg.attended_at=now;}
+  showToast('<i data-lucide="check-circle" size="18" stroke-width="2.5"></i> Asistencia registrada.');
+  renderList();
+}
+
+document.getElementById('btn-load-event').addEventListener('click',()=>{
+  const id=document.getElementById('event-select').value;
+  if(!id)return;
+  loadCheckin(id);
+});
+document.getElementById('ci-search').addEventListener('input',renderList);
+document.getElementById('ci-filter').addEventListener('change',renderList);
+document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
+
+(async()=>{
+  const auth=await authGuard();
+  if(!auth)return;
+  currentSession=auth.session;
+  renderUser(auth.profile);
+  await loadEventList();
+})();
+</script>
+
+
+<script>var _li = setInterval(function(){if(window.lucide){window.lucide.createIcons();clearInterval(_li);}}, 150);</script>
+</div>
+</body>
+</html>
