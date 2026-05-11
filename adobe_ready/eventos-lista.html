@@ -684,7 +684,7 @@ async function loadEvents(){
 document.getElementById('search-input').addEventListener('input',applyFilters);
 document.getElementById('filter-status').addEventListener('change',applyFilters);
 document.getElementById('filter-type').addEventListener('change',applyFilters);
-document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sb').classList.toggle('open'));
 document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
 
 (async()=>{
