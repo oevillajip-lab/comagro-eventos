@@ -511,7 +511,7 @@ tbody tr:hover { background: var(--surface-2); }
 .search-input:focus { border-color: var(--primary); }
 
 /* ---- Page Header ---- */
-.page-header {
+.comagro-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -519,8 +519,8 @@ tbody tr:hover { background: var(--surface-2); }
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
-.page-header-left h1 { font-size: 1.4rem; }
-.page-header-left p  { font-size: .85rem; margin-top: 2px; }
+.comagro-page-header-left h1 { font-size: 1.4rem; }
+.comagro-page-header-left p  { font-size: .85rem; margin-top: 2px; }
 
 /* ---- Empty State ---- */
 .empty-state {
@@ -817,7 +817,7 @@ tbody tr:hover { background: var(--surface-2); }
   .topbar { padding: 0 16px; }
   .grid-stats { grid-template-columns: repeat(2, 1fr); }
   .form-row { grid-template-columns: 1fr; }
-  .page-header { flex-direction: column; align-items: flex-start; }
+  .comagro-page-header { flex-direction: column; align-items: flex-start; }
 }
 
 @media (max-width: 420px) {
@@ -900,7 +900,7 @@ tbody tr:hover { background: var(--surface-2); }
 
       <div id="dashboard-content" style="display:none;">
         <!-- Page Header -->
-        <div class="page-header">
+        <div class="comagro-page-header">
           <div style="margin-bottom: 32px;">
           <h1 style="font-size:1.8rem; display:flex; align-items:center; gap:12px; letter-spacing: -0.02em;">
             Bienvenido <i data-lucide="hand" size="28" stroke-width="2.5" style="color: var(--warning);"></i>
