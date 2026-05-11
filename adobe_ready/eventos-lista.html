@@ -583,12 +583,11 @@
       </div>
 
       <!-- Events grid -->
-      <div id="events-loader" class="loader-page"><div class="loader" style="border-top-color:var(--primary);border-color:var(--border);"></div></div>
+      <div id="events-loader" class="loader-wrap"><div class="spin"></div></div>
       <div class="grid-events" id="events-grid" style="display:none;"></div>
       <div id="empty-state-events" style="display:none;">
-        <div class="empty-state" style="padding:64px 24px;">
-          <div class="empty-state-icon"><i data-lucide="inbox" size="48" stroke-width="1.5"></i></div>
-          <h3>Sin eventos</h3>
+        <div class="empty" style="padding:64px 24px;">
+          <h4>Sin eventos</h4>
           <p>No hay eventos que coincidan con los filtros.</p>
           <a href="/eventos-crear" class="btn btn-primary" style="margin-top:18px;">Crear primer evento</a>
         </div>
@@ -641,7 +640,7 @@ function buildEventCard(e){
         <div class="event-card-name">${sanitize(e.name)}</div>
         <div class="event-card-location"><i data-lucide="map-pin" size="16" stroke-width="2"></i> ${sanitize(e.location||'Sin ubicación definida')}</div>
         <div style="margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-2);margin-bottom:5px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--c-ink3);margin-bottom:5px;">
             <span>${count} registrados</span><span>${pct}% cupo</span>
           </div>
           <div class="progress"><div class="progress-bar ${pct>80?'red':pct>50?'yellow':''}" style="width:${Math.min(pct,100)}%;"></div></div>

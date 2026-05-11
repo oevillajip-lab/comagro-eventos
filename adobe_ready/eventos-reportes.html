@@ -756,6 +756,7 @@ async function loadReport(eventId) {
 // PDF Export logic
 document.getElementById('btn-export-pdf').addEventListener('click', async () => {
   const btn = document.getElementById('btn-export-pdf');
+  const origHTML = btn.innerHTML;
   btn.textContent = 'Generando PDF...';
   btn.disabled = true;
 
@@ -779,7 +780,7 @@ document.getElementById('btn-export-pdf').addEventListener('click', async () => 
     showToast('Error al generar PDF','error');
   }
 
-  btn.textContent = 'Exportar a PDF';
+  btn.innerHTML = origHTML;
   btn.disabled = false;
 });
 

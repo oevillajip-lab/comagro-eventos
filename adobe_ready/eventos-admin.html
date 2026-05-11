@@ -480,6 +480,9 @@
 @media (max-width: 520px) {
   #ce-root .stats-row { grid-template-columns: 1fr; }
 }
+/* ═══ MODAL ═══ */
+#ce-root .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(11,17,32,.55); z-index: 99998; align-items: center; justify-content: center; }
+#ce-root .modal-backdrop.open { display: flex; }
 
 
 </style>
@@ -668,7 +671,7 @@
       </div>
 
       <!-- Modal: Cambiar Estado -->
-      <div id="modal-status" style="display:none;position:fixed;inset:0;background:rgba(11,17,32,.55);z-index:99998;align-items:center;justify-content:center;">
+      <div id="modal-status" class="modal-backdrop">
         <div style="background:var(--c-surface);border-radius:var(--r3);padding:28px;width:100%;max-width:400px;box-shadow:var(--shadow3);">
           <h3 style="margin-bottom:18px;font-size:16px;">Cambiar Estado del Evento</h3>
           <div class="form-group">
@@ -681,7 +684,7 @@
           </div>
           <div style="display:flex;gap:10px;margin-top:20px;">
             <button class="btn btn-primary" id="btn-save-status">Guardar</button>
-            <button class="btn btn-outline" onclick="document.getElementById('modal-status').style.display='none';">Cancelar</button>
+            <button class="btn btn-outline" onclick="document.getElementById('modal-status').classList.remove('open');">Cancelar</button>
           </div>
         </div>
       </div>
@@ -794,8 +797,7 @@ document.getElementById('btn-copy-url').addEventListener('click', () => {
 // Cambiar estado
 document.getElementById('btn-edit-status').addEventListener('click', () => {
   document.getElementById('sel-status').value = currentEvent.status;
-  const m = document.getElementById('modal-status');
-  m.style.display = 'flex';
+  document.getElementById('modal-status').classList.add('open');
 });
 
 document.getElementById('btn-save-status').addEventListener('click', async () => {
@@ -813,7 +815,7 @@ document.getElementById('btn-save-status').addEventListener('click', async () =>
     showToast('Error al actualizar estado','error');
   } else {
     showToast('Estado actualizado exitosamente');
-    document.getElementById('modal-status').style.display = 'none';
+    document.getElementById('modal-status').classList.remove('open');
     currentEvent.status = newStatus;
     const badge = document.getElementById('header-status');
     badge.className = `badge ${statusBadge(newStatus)}`;

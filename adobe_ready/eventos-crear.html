@@ -698,9 +698,14 @@ function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>'
 function slugify(t){return t.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');}
 function showStatus(msg,type){
   const el=document.getElementById('form-status');
-  el.style.background=type==='success'?'var(--c-green-lt)':type==='danger'?'var(--c-red-lt)':'var(--c-amber-lt)';
-  el.style.color=type==='success'?'var(--c-green)':type==='danger'?'var(--c-red)':'var(--c-amber)';
-  el.style.border='1px solid '+(type==='success'?'#a7f3d0':type==='danger'?'#fecaca':'#fde68a');
+  if(type==='success'){
+    el.style.background='var(--c-green-lt)';el.style.color='var(--c-green)';el.style.borderColor='var(--c-green)';
+  } else if(type==='danger'){
+    el.style.background='var(--c-red-lt)';el.style.color='var(--c-red)';el.style.borderColor='var(--c-red)';
+  } else {
+    el.style.background='var(--c-amber-lt)';el.style.color='var(--c-amber)';el.style.borderColor='var(--c-amber)';
+  }
+  el.style.border='1px solid';
   el.textContent=msg;
   el.style.display='block';
 }
