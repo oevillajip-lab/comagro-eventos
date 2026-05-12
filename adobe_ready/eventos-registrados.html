@@ -481,6 +481,29 @@
 @media (max-width: 520px) {
   #ce-root .stats-row { grid-template-columns: 1fr; }
 }
+/* ═══ BADGES EXTRA ═══ */
+#ce-root .badge-yellow { background: var(--c-amber-lt); color: var(--c-amber); }
+#ce-root .badge-red    { background: var(--c-red-lt);   color: var(--c-red);   }
+
+/* ═══ FILTER BAR ═══ */
+#ce-root .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#ce-root .search-input-wrap { position: relative; }
+#ce-root .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--c-ink4); display: flex; align-items: center; }
+#ce-root .search-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#ce-root .search-input { width: 100%; height: 38px; padding: 0 12px 0 36px; border: 1.5px solid var(--c-border); border-radius: var(--r1); background: var(--c-surface); color: var(--c-ink1); font-size: 13.5px; outline: none; transition: border-color .15s; }
+#ce-root .search-input:focus { border-color: var(--c-blue); }
+
+/* ═══ MODAL ═══ */
+#ce-root .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(11,17,32,.55); z-index: 99998; align-items: center; justify-content: center; }
+#ce-root .modal-backdrop.open { display: flex; }
+#ce-root .modal { background: var(--c-surface); border-radius: var(--r3); padding: 28px; width: 100%; max-width: 480px; box-shadow: var(--shadow3); }
+#ce-root .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+#ce-root .modal-header h3 { font-size: 16px; color: var(--c-ink1); }
+#ce-root .modal-close { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--c-ink3); padding: 4px; line-height: 1; }
+#ce-root .modal-close:hover { color: var(--c-ink1); }
+#ce-root .modal-body { margin-bottom: 20px; }
+#ce-root .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+#ce-root .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
 
 </style>
@@ -573,17 +596,17 @@
       <!-- Registrados panel -->
       <div id="reg-panel" style="display:none;">
         <!-- Stats row -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;" id="reg-stats">
-          <div class="stat-card"><div class="stat-icon blue"><i data-lucide="users" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-total">0</div><div class="stat-label">Registrados</div></div></div>
-          <div class="stat-card"><div class="stat-icon green"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-present">0</div><div class="stat-label">Presentes</div></div></div>
-          <div class="stat-card"><div class="stat-icon yellow"><i data-lucide="hourglass" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-pending">0</div><div class="stat-label">Pendientes</div></div></div>
-          <div class="stat-card"><div class="stat-icon blue"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></div><div class="stat-body"><div class="stat-value" id="s-pct">0%</div><div class="stat-label">Asistencia</div></div></div>
+        <div class="stats-row" style="margin-bottom:20px;" id="reg-stats">
+          <div class="scard"><div class="scard-ic blue"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="scard-val" id="s-total">0</div><div class="scard-lbl">Registrados</div></div></div>
+          <div class="scard"><div class="scard-ic green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div><div class="scard-val" id="s-present">0</div><div class="scard-lbl">Presentes</div></div></div>
+          <div class="scard"><div class="scard-ic amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="scard-val" id="s-pending">0</div><div class="scard-lbl">Pendientes</div></div></div>
+          <div class="scard"><div class="scard-ic blue"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div><div class="scard-val" id="s-pct">0%</div><div class="scard-lbl">Asistencia</div></div></div>
         </div>
 
         <!-- Filter bar -->
         <div class="filter-bar" style="margin-bottom:16px;">
           <div class="search-input-wrap" style="flex:1;">
-            <span class="search-icon"><i data-lucide="search" size="18" stroke-width="2.5"></i></span>
+            <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
             <input type="text" id="reg-search" class="search-input" placeholder="Nombre, correo, empresa, ID...">
           </div>
           <select id="reg-filter-status" class="form-control" style="width:auto;height:38px;">
@@ -593,10 +616,15 @@
             <option value="presente">Presente</option>
             <option value="ausente">Ausente</option>
           </select>
+          <button class="btn btn-outline" id="btn-export-excel">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="8 17 10 15 12 17"/><line x1="10" y1="15" x2="10" y2="20"/></svg>
+            Exportar Excel
+          </button>
         </div>
 
         <!-- Table -->
-        <div class="table-wrapper">
+        <div class="card tcard">
+          <div class="tbl-wrap">
           <table>
             <thead>
               <tr>
@@ -611,11 +639,12 @@
               </tr>
             </thead>
             <tbody id="reg-tbody">
-              <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-3);">Seleccioná un evento para ver los registrados.</td></tr>
+              <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--c-ink4);">Seleccioná un evento para ver los registrados.</td></tr>
             </tbody>
           </table>
+          </div>
         </div>
-        <div style="margin-top:10px;font-size:.78rem;color:var(--text-3);" id="reg-count-label"></div>
+        <div style="margin-top:10px;font-size:12px;color:var(--c-ink4);" id="reg-count-label"></div>
       </div>
     
       </div>
@@ -678,7 +707,7 @@ function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>'
 function formatDateTime(iso){if(!iso)return '—';const d=new Date(iso);return d.toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function statusLabel(s){return {'preregistro':'Preregistro','confirmado':'Confirmado','presente':'Presente','ausente':'Ausente'}[s]||s;}
 function statusBadge(s){return {'preregistro':'badge-yellow','confirmado':'badge-blue','presente':'badge-green','ausente':'badge-red'}[s]||'badge-gray';}
-function showToast(msg,type='success'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span class="toast-icon">${type==='success'?'✓':'✕'}</span><span>${sanitize(msg)}</span>`;c.appendChild(t);setTimeout(()=>t.classList.add('toast-show'),10);setTimeout(()=>{t.classList.remove('toast-show');setTimeout(()=>t.remove(),400);},3000);}
+function showToast(msg,type='success'){const c=document.getElementById('toasts');const t=document.createElement('div');t.className='toast '+(type==='success'?'toast-ok':'toast-err');t.textContent=msg;c.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),350);},3500);}
 
 let allRegs=[], currentEventName='';
 
@@ -706,24 +735,23 @@ function applyFilters(){
   document.getElementById('reg-count-label').textContent=`Mostrando ${f.length} de ${total} registros`;
 
   const tbody=document.getElementById('reg-tbody');
-  if(f.length===0){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state" style="padding:32px;"><div class="empty-state-icon"><i data-lucide="user" size="48" stroke-width="1.5"></i></div><h3>Sin resultados</h3></div></td></tr>`;return;}
+  if(f.length===0){tbody.innerHTML=`<tr><td colspan="8"><div class="empty" style="padding:32px;"><h4>Sin resultados</h4><p>No hay registros que coincidan con la búsqueda.</p></div></td></tr>`;return;}
   tbody.innerHTML=f.map(r=>`
     <tr>
-      <td><code style="font-size:.75rem;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;">#${sanitize(r.short_id)}</code></td>
+      <td><code style="font-size:12px;background:var(--c-blue-lt);color:var(--c-blue);padding:2px 6px;border-radius:4px;">#${sanitize(r.short_id)}</code></td>
       <td><strong>${sanitize(r.first_name+' '+r.last_name)}</strong></td>
       <td>${sanitize(r.company||'—')}</td>
-      <td style="font-size:.82rem;">${sanitize(r.email)}</td>
-      <td style="font-size:.82rem;">${sanitize(r.phone||'—')}</td>
-      <td style="font-size:.78rem;color:var(--text-3);">${formatDateTime(r.registered_at)}</td>
+      <td style="font-size:13px;">${sanitize(r.email)}</td>
+      <td style="font-size:13px;">${sanitize(r.phone||'—')}</td>
+      <td style="font-size:12px;color:var(--c-ink3);">${formatDateTime(r.registered_at)}</td>
       <td><span class="badge ${statusBadge(r.status)}">${sanitize(statusLabel(r.status))}</span></td>
-      <td><button class="btn btn-secondary btn-sm" onclick="openEdit('${r.id}')">Editar</button></td>
+      <td><button class="btn btn-outline btn-sm" onclick="openEdit('${r.id}')">Editar</button></td>
     </tr>
   `).join('');
 }
 
 async function loadRegs(eventId, eventName){
   currentEventName=eventName;
-  document.getElementById('topbar-title').textContent='Registrados — '+eventName;
   const {data:regs}=await sb.from('registrations').select('*').eq('event_id',eventId).order('registered_at',{ascending:false});
   allRegs=regs||[];
   document.getElementById('reg-panel').style.display='block';
@@ -782,7 +810,7 @@ document.getElementById('btn-export-excel').addEventListener('click',()=>{
 
 document.getElementById('reg-search').addEventListener('input',applyFilters);
 document.getElementById('reg-filter-status').addEventListener('change',applyFilters);
-document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sb').classList.toggle('open'));
 document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
 
 document.getElementById('btn-load').addEventListener('click',async()=>{

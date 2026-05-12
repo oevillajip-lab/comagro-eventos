@@ -558,44 +558,42 @@
       </header>
       <div class="page" id="page">
         
-      <div class="breadcrumb">
-        <a href="/eventos-lista">Eventos</a>
-        <span class="sep">›</span>
+      <div style="margin-bottom:12px;font-size:13px;color:var(--c-ink4);">
+        <a href="/eventos-lista" style="color:var(--c-blue);">Eventos</a>
+        <span style="margin:0 6px;">›</span>
         <span>Crear Evento</span>
       </div>
 
       <div style="max-width:720px;">
-        <div class="comagro-page-header">
-          <div class="comagro-page-header-left">
-            <div class="welcome-title">Nuevo Evento</div>
-            <p>Completá los datos para crear el evento. El slug y la URL pública se generarán automáticamente.</p>
-          </div>
+        <div style="margin-bottom:22px;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:24px;font-weight:700;color:var(--c-ink1);line-height:1.2;">Nuevo Evento</div>
+          <p style="font-size:13px;color:var(--c-ink3);margin-top:4px;">Completá los datos para crear el evento. El slug y la URL pública se generarán automáticamente.</p>
         </div>
 
         <form id="form-crear" novalidate>
 
           <!-- Sección: Información básica -->
-          <div class="card" style="margin-bottom:20px;">
-            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);"><i data-lucide="clipboard-list" size="20" stroke-width="2.5"></i> Información básica</h3>
+          <div class="card" style="margin-bottom:20px;padding:20px;">
+            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--c-border);font-size:14px;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;display:inline-block;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Información básica</h3>
 
             <div class="form-group">
-              <label class="form-label" for="ev-name">Nombre del evento <span class="req">*</span></label>
+              <label class="form-label" for="ev-name">Nombre del evento <span style="color:var(--c-red);">*</span></label>
               <input type="text" id="ev-name" class="form-control" placeholder="Ej: Lanzamiento Terasaki 2026" maxlength="150" required>
             </div>
 
             <!-- Slug preview -->
             <div class="form-group">
               <label class="form-label">URL pública generada</label>
-              <div style="display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;height:40px;font-size:.875rem;color:var(--text-2);">
-                <span style="color:var(--text-3);white-space:nowrap;">tudominio.com/registro.html?slug=</span>
-                <strong id="slug-preview" style="color:var(--primary);">—</strong>
+              <div style="display:flex;align-items:center;gap:8px;background:var(--c-surface2);border:1.5px solid var(--c-border);border-radius:var(--r1);padding:0 12px;height:42px;font-size:13.5px;color:var(--c-ink3);">
+                <span style="color:var(--c-ink4);white-space:nowrap;">tudominio.com/registro.html?slug=</span>
+                <strong id="slug-preview" style="color:var(--c-blue);">—</strong>
               </div>
-              <div class="form-hint">Se genera automáticamente al escribir el nombre.</div>
+              <div style="font-size:12px;color:var(--c-ink4);margin-top:4px;">Se genera automáticamente al escribir el nombre.</div>
             </div>
 
-            <div class="form-row">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div class="form-group">
-                <label class="form-label" for="ev-type">Tipo <span class="req">*</span></label>
+                <label class="form-label" for="ev-type">Tipo <span style="color:var(--c-red);">*</span></label>
                 <select id="ev-type" class="form-control" required>
                   <option value="">Seleccionar tipo</option>
                   <option value="evento">Evento</option>
@@ -621,12 +619,12 @@
           </div>
 
           <!-- Sección: Fecha y Lugar -->
-          <div class="card" style="margin-bottom:20px;">
-            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);"><i data-lucide="map-pin" size="16" stroke-width="2"></i> Fecha y Lugar</h3>
+          <div class="card" style="margin-bottom:20px;padding:20px;">
+            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--c-border);font-size:14px;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;display:inline-block;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Fecha y Lugar</h3>
 
-            <div class="form-row">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div class="form-group">
-                <label class="form-label" for="ev-date">Fecha <span class="req">*</span></label>
+                <label class="form-label" for="ev-date">Fecha <span style="color:var(--c-red);">*</span></label>
                 <input type="date" id="ev-date" class="form-control" required>
               </div>
               <div class="form-group">
@@ -642,43 +640,43 @@
           </div>
 
           <!-- Sección: Capacidad e Inscripción -->
-          <div class="card" style="margin-bottom:20px;">
-            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);"><i data-lucide="users" size="18" stroke-width="2.5"></i> Capacidad e Inscripción</h3>
+          <div class="card" style="margin-bottom:20px;padding:20px;">
+            <h3 style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--c-border);font-size:14px;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;display:inline-block;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Capacidad e Inscripción</h3>
 
-            <div class="form-row">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div class="form-group">
-                <label class="form-label" for="ev-capacity">Cupo máximo <span class="req">*</span></label>
+                <label class="form-label" for="ev-capacity">Cupo máximo <span style="color:var(--c-red);">*</span></label>
                 <input type="number" id="ev-capacity" class="form-control" placeholder="100" min="1" max="10000" value="100" required>
-                <div class="form-hint">Número máximo de inscriptos permitidos.</div>
+                <div style="font-size:12px;color:var(--c-ink4);margin-top:4px;">Número máximo de inscriptos permitidos.</div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="ev-deadline">Fecha límite de inscripción</label>
                 <input type="date" id="ev-deadline" class="form-control">
-                <div class="form-hint">Dejá vacío para no tener límite.</div>
+                <div style="font-size:12px;color:var(--c-ink4);margin-top:4px;">Dejá vacío para no tener límite.</div>
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="ev-banner">URL del banner / imagen</label>
               <input type="url" id="ev-banner" class="form-control" placeholder="https://..." maxlength="500">
-              <div class="form-hint">Enlace directo a imagen JPG, PNG o WebP.</div>
+              <div style="font-size:12px;color:var(--c-ink4);margin-top:4px;">Enlace directo a imagen JPG, PNG o WebP.</div>
             </div>
 
             <!-- Banner preview -->
-            <div id="banner-preview" style="display:none;margin-top:10px;border-radius:var(--radius);overflow:hidden;height:140px;background:var(--surface-3);">
+            <div id="banner-preview" style="display:none;margin-top:10px;border-radius:var(--r2);overflow:hidden;height:140px;background:var(--c-surface2);">
               <img id="banner-img" src="" alt="Preview" style="width:100%;height:100%;object-fit:cover;">
             </div>
           </div>
 
           <!-- Error / Success -->
-          <div id="form-status" style="display:none;margin-bottom:16px;"></div>
+          <div id="form-status" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:var(--r1);font-size:13.5px;font-weight:500;"></div>
 
           <!-- Actions -->
           <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <button type="submit" class="btn btn-primary btn-lg" id="btn-submit">
+            <button type="submit" class="btn btn-primary" id="btn-submit" style="height:42px;padding:0 24px;">
               <span id="btn-submit-text">✓ Crear Evento</span>
             </button>
-            <a href="/eventos-lista" class="btn btn-secondary btn-lg">Cancelar</a>
+            <a href="/eventos-lista" class="btn btn-outline" style="height:42px;padding:0 24px;">Cancelar</a>
           </div>
         </form>
       </div>
@@ -700,9 +698,16 @@ function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>'
 function slugify(t){return t.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');}
 function showStatus(msg,type){
   const el=document.getElementById('form-status');
-  el.className=`alert alert-${type}`;
+  if(type==='success'){
+    el.style.background='var(--c-green-lt)';el.style.color='var(--c-green)';el.style.borderColor='var(--c-green)';
+  } else if(type==='danger'){
+    el.style.background='var(--c-red-lt)';el.style.color='var(--c-red)';el.style.borderColor='var(--c-red)';
+  } else {
+    el.style.background='var(--c-amber-lt)';el.style.color='var(--c-amber)';el.style.borderColor='var(--c-amber)';
+  }
+  el.style.border='1px solid';
   el.textContent=msg;
-  el.style.display='flex';
+  el.style.display='block';
 }
 
 /* ---- Auth guard ---- */
@@ -798,7 +803,7 @@ document.getElementById('form-crear').addEventListener('submit', async function(
   }
 });
 
-document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sb').classList.toggle('open'));
 document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
 
 (async()=>{

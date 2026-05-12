@@ -486,6 +486,9 @@
 @media (max-width: 520px) {
   #ce-root .stats-row { grid-template-columns: 1fr; }
 }
+/* ═══ BADGES EXTRA ═══ */
+#ce-root .badge-yellow { background: var(--c-amber-lt); color: var(--c-amber); }
+#ce-root .badge-red    { background: var(--c-red-lt);   color: var(--c-red);   }
 
 
 </style>
@@ -565,80 +568,72 @@
       <div class="page" id="page">
         
       <!-- Selector de evento para reporte -->
-      <div class="card" style="margin-bottom:22px;" id="event-selector" data-html2canvas-ignore>
-        <h3 style="margin-bottom:12px;">Generar Reporte de Evento</h3>
+      <div class="card" style="margin-bottom:22px;padding:20px;" id="event-selector" data-html2canvas-ignore>
+        <h3 style="margin-bottom:12px;font-size:14px;">Generar Reporte de Evento</h3>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <select id="event-select" class="form-control" style="flex:1;min-width:200px;">
             <option value="">— Elegir evento —</option>
           </select>
           <button class="btn btn-primary" id="btn-load-report">Generar</button>
+          <button class="btn btn-outline" id="btn-export-pdf" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exportar a PDF
+          </button>
         </div>
       </div>
 
       <!-- Área exportable -->
-      <div id="report-content" style="display:none; background:#fff; padding:32px; border-radius:var(--radius-lg); border:1px solid var(--border);">
+      <div id="report-content" style="display:none; background:var(--c-surface); padding:32px; border-radius:var(--r3); border:1px solid var(--c-border);">
         <!-- Report Header (Comagro Branding) -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--primary); padding-bottom:16px; margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--c-blue); padding-bottom:16px; margin-bottom:24px;">
           <div>
-            <div class="welcome-title">Nombre del Evento</div>
-            <div style="color:var(--text-2); font-size:.9rem; display:flex; gap:16px;">
-              <span id="r-event-date"><i data-lucide="calendar" size="18" stroke-width="2.5"></i> Fecha</span>
-              <span id="r-event-location"><i data-lucide="map-pin" size="16" stroke-width="2"></i> Lugar</span>
+            <div id="r-event-name" style="font-family:'Montserrat',sans-serif;font-size:22px;font-weight:700;color:var(--c-ink1);line-height:1.2;">Nombre del Evento</div>
+            <div style="color:var(--c-ink3); font-size:13px; display:flex; gap:16px;margin-top:6px;">
+              <span id="r-event-date">Fecha</span>
+              <span id="r-event-location">Lugar</span>
             </div>
           </div>
           <img src="https://www.chacomer.com.py/media/wysiwyg/comagro/ISOLOGO_COMAGRO_COLOR.png" alt="Comagro" style="height:46px;">
         </div>
 
         <div style="margin-bottom:32px;">
-          <h3 style="margin-bottom:16px; color:var(--text-1); font-size:1.1rem;">Resumen de Asistencia</h3>
-          <div class="grid-stats">
-            <div class="stat-card" style="box-shadow:none; background:var(--surface-2);">
-              <div class="stat-icon blue"><i data-lucide="users" size="18" stroke-width="2.5"></i></div>
-              <div class="stat-body">
-                <div class="stat-value" id="r-total">0</div>
-                <div class="stat-label">Total Inscriptos</div>
-              </div>
+          <h3 style="margin-bottom:16px; color:var(--c-ink1); font-size:15px;">Resumen de Asistencia</h3>
+          <div class="stats-row">
+            <div class="scard" style="box-shadow:none; background:var(--c-surface2);">
+              <div class="scard-ic blue"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div><div class="scard-val" id="r-total">0</div><div class="scard-lbl">Total Inscriptos</div></div>
             </div>
-            <div class="stat-card" style="box-shadow:none; background:var(--success-bg);">
-              <div class="stat-icon green"><i data-lucide="check-circle" size="18" stroke-width="2.5"></i></div>
-              <div class="stat-body">
-                <div class="stat-value" id="r-present" style="color:var(--success);">0</div>
-                <div class="stat-label">Presentes</div>
-              </div>
+            <div class="scard" style="box-shadow:none; background:var(--c-green-lt);">
+              <div class="scard-ic green"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div><div class="scard-val" id="r-present" style="color:var(--c-green);">0</div><div class="scard-lbl">Presentes</div></div>
             </div>
-            <div class="stat-card" style="box-shadow:none; background:var(--danger-bg);">
-              <div class="stat-icon red"><i data-lucide="x-circle" size="18" stroke-width="2.5"></i></div>
-              <div class="stat-body">
-                <div class="stat-value" id="r-absent" style="color:var(--danger);">0</div>
-                <div class="stat-label">Ausentes</div>
-              </div>
+            <div class="scard" style="box-shadow:none; background:var(--c-red-lt);">
+              <div class="scard-ic" style="background:var(--c-red-lt);color:var(--c-red);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+              <div><div class="scard-val" id="r-absent" style="color:var(--c-red);">0</div><div class="scard-lbl">Ausentes</div></div>
             </div>
-            <div class="stat-card" style="box-shadow:none; background:var(--surface-2);">
-              <div class="stat-icon blue"><i data-lucide="trending-up" size="18" stroke-width="2.5"></i></div>
-              <div class="stat-body">
-                <div class="stat-value" id="r-pct">0%</div>
-                <div class="stat-label">% Asistencia</div>
-              </div>
+            <div class="scard" style="box-shadow:none; background:var(--c-surface2);">
+              <div class="scard-ic blue"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+              <div><div class="scard-val" id="r-pct">0%</div><div class="scard-lbl">% Asistencia</div></div>
             </div>
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px;" class="charts-row">
           <div>
-            <h3 style="margin-bottom:16px; font-size:1rem; text-align:center;">Estado de Registros</h3>
+            <h3 style="margin-bottom:16px; font-size:14px; text-align:center;color:var(--c-ink1);">Estado de Registros</h3>
             <div style="position:relative; height:240px; width:100%;">
               <canvas id="chart-status"></canvas>
             </div>
           </div>
           <div>
-            <h3 style="margin-bottom:16px; font-size:1rem; text-align:center;">Top Empresas Participantes</h3>
+            <h3 style="margin-bottom:16px; font-size:14px; text-align:center;color:var(--c-ink1);">Top Empresas Participantes</h3>
             <div style="position:relative; height:240px; width:100%;">
               <canvas id="chart-companies"></canvas>
             </div>
           </div>
         </div>
 
-        <div style="border-top:1px solid var(--border); padding-top:16px; text-align:center; font-size:.75rem; color:var(--text-3);">
+        <div style="border-top:1px solid var(--c-border); padding-top:16px; text-align:center; font-size:12px; color:var(--c-ink4);">
           Reporte generado automáticamente por la Plataforma de Eventos Comagro el <span id="r-timestamp"></span>
         </div>
       </div>
@@ -658,7 +653,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken
 
 function sanitize(s){return String(s||'').replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);}
 function formatDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric'});}
-function showToast(msg,type='success'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span class="toast-icon">${type==='success'?'✓':'✕'}</span><span>${sanitize(msg)}</span>`;c.appendChild(t);setTimeout(()=>t.classList.add('toast-show'),10);setTimeout(()=>{t.classList.remove('toast-show');setTimeout(()=>t.remove(),400);},3000);}
+function showToast(msg,type='success'){const c=document.getElementById('toasts');const t=document.createElement('div');t.className='toast '+(type==='success'?'toast-ok':'toast-err');t.textContent=msg;c.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),350);},3500);}
 
 let chartStatusInst = null;
 let chartCompaniesInst = null;
@@ -685,8 +680,8 @@ async function loadReport(eventId) {
     currentEventName = ev.name;
 
     document.getElementById('r-event-name').textContent = ev.name;
-    document.getElementById('r-event-date').textContent = `<i data-lucide="calendar" size="18" stroke-width="2.5"></i> ${formatDate(ev.date)}`;
-    document.getElementById('r-event-location').textContent = `<i data-lucide="map-pin" size="16" stroke-width="2"></i> ${ev.location || 'Sin ubicación'}`;
+    document.getElementById('r-event-date').textContent = formatDate(ev.date);
+    document.getElementById('r-event-location').textContent = ev.location || 'Sin ubicación';
     document.getElementById('r-timestamp').textContent = new Date().toLocaleString('es-PY');
 
     const {data:regs} = await sb.from('registrations').select('status, company').eq('event_id',eventId);
@@ -761,6 +756,7 @@ async function loadReport(eventId) {
 // PDF Export logic
 document.getElementById('btn-export-pdf').addEventListener('click', async () => {
   const btn = document.getElementById('btn-export-pdf');
+  const origHTML = btn.innerHTML;
   btn.textContent = 'Generando PDF...';
   btn.disabled = true;
 
@@ -784,11 +780,11 @@ document.getElementById('btn-export-pdf').addEventListener('click', async () => 
     showToast('Error al generar PDF','error');
   }
 
-  btn.innerHTML = '<i data-lucide="file-text" size="16" stroke-width="2.5"></i> Exportar a PDF';
+  btn.innerHTML = origHTML;
   btn.disabled = false;
 });
 
-document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('sb-tog').addEventListener('click',()=>document.getElementById('sb').classList.toggle('open'));
 document.getElementById('btn-logout').addEventListener('click',async()=>{await sb.auth.signOut();window.location.replace('/eventos-login');});
 document.getElementById('btn-load-report').addEventListener('click', () => {
   loadReport(document.getElementById('event-select').value);
